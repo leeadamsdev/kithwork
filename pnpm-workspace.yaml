@@ -14,6 +14,8 @@ allowBuilds:
   esbuild: true
 
 engineStrict: true
+# Resolve dependency engines against our target, including on Dependabot's older host.
+nodeVersion: 26.13.0
 pmOnFail: error
 saveExact: true
 strictDepBuilds: true
