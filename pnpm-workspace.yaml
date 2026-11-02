@@ -6,6 +6,10 @@ catalog:
   typescript: 6.0.3
   vitest: 5.1.0
 
+overrides:
+  # GHSA-g3hv-75wg-m249: remove once the lint tooling adopts patched minimatch.
+  "minimatch@10.2.6": 11.0.3
+
 allowBuilds:
   esbuild: true
 
