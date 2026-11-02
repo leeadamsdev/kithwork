@@ -1,0 +1,21 @@
+packages:
+  - packages/*
+
+catalog:
+  "@types/node": 26.6.6
+  typescript: 6.0.3
+  vitest: 5.1.0
+
+allowBuilds:
+  esbuild: true
+
+engineStrict: true
+pmOnFail: error
+saveExact: true
+strictDepBuilds: true
+strictPeerDependencies: true
+minimumReleaseAgeExclude:
+  - "@vitest/coverage-v8@5.1.0"
+  - "@vitest/mocker@5.1.0"
+  - "@vitest/spy@5.1.0"
+  - vitest@5.1.0

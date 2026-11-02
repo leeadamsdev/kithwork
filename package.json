@@ -1,0 +1,34 @@
+{
+  "name": "kithwork",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": "26.13.0",
+    "pnpm": "12.16.1"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "check": "pnpm format:check && turbo run build typecheck test:unit test:build && pnpm exec eslint . --max-warnings 0 && pnpm exec tsc --project tsconfig.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "turbo run build && eslint . --max-warnings 0",
+    "test": "turbo run test:unit test:build",
+    "test:build": "turbo run test:build",
+    "test:unit": "turbo run test:unit",
+    "test:coverage": "turbo run test:coverage",
+    "typecheck": "turbo run typecheck && tsc --project tsconfig.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "catalog:",
+    "eslint": "10.14.0",
+    "jiti": "2.7.0",
+    "prettier": "3.9.10",
+    "turbo": "2.11.10",
+    "typescript": "catalog:",
+    "typescript-eslint": "8.72.1"
+  }
+}

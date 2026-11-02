@@ -1,0 +1,35 @@
+{
+  "name": "@kithwork/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
+    "clean": "node scripts/clean.ts",
+    "test:build": "vitest run --project build",
+    "test:unit": "vitest run --project unit",
+    "test:coverage": "vitest run --project unit --coverage",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "5.1.0",
+    "esbuild": "0.28.2",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
