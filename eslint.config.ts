@@ -29,8 +29,8 @@ export default defineConfig([
             {
               group: [
                 "node:*",
-                "@kithwork/backend",
-                "@kithwork/backend/**",
+                "@kithwork/api",
+                "@kithwork/api/**",
                 "@kithwork/database",
                 "@kithwork/database/**",
               ],

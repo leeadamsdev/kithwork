@@ -10,6 +10,9 @@
     "pnpm": "12.16.1"
   },
   "scripts": {
+    "dev": "turbo run dev --filter=@kithwork/api...",
+    "env:init": "node scripts/env-init.ts",
+    "infra:telemetry": "docker compose --profile telemetry up --wait --wait-timeout 120",
     "build": "turbo run build",
     "check": "pnpm format:check && turbo run build typecheck test:unit test:build && pnpm exec eslint . --max-warnings 0 && pnpm exec tsc --project tsconfig.json && pnpm exec tsc --project tests/tsconfig.json && pnpm test:tooling",
     "format": "prettier --write .",
@@ -25,7 +28,7 @@
     "infra:status": "docker compose ps",
     "infra:logs": "docker compose logs --follow",
     "test:tooling": "pnpm exec turbo run build --filter=@kithwork/database && pnpm exec vitest run --project tooling",
-    "test:integration": "pnpm exec turbo run build --filter=@kithwork/database && pnpm exec vitest run --project integration",
+    "test:integration": "pnpm exec turbo run build --filter=@kithwork/api... && pnpm exec vitest run --project integration",
     "test:integration:coverage": "pnpm test:integration --coverage"
   },
   "devDependencies": {

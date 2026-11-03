@@ -1,6 +1,19 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "tasks": {
+    "dev": {
+      "dependsOn": ["^build"],
+      "persistent": true,
+      "cache": false,
+      "env": [
+        "NODE_ENV",
+        "API_*",
+        "LOG_LEVEL",
+        "DATABASE_*",
+        "REDIS_URL",
+        "OTEL_*"
+      ]
+    },
     "build": {
       "dependsOn": ["^build", "clean"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/tsconfig.base.json"],

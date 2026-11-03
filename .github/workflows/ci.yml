@@ -119,6 +119,8 @@ jobs:
           path: |
             packages/*/coverage/lcov.info
             packages/*/coverage/coverage-summary.json
+            apps/*/coverage/lcov.info
+            apps/*/coverage/coverage-summary.json
             coverage/integration/lcov.info
             coverage/integration/coverage-summary.json
           if-no-files-found: error

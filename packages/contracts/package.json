@@ -15,6 +15,7 @@
     "dist"
   ],
   "scripts": {
+    "dev": "tsc --project tsconfig.build.json --watch --preserveWatchOutput",
     "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
     "clean": "node scripts/clean.ts",
     "test:build": "vitest run --project build",

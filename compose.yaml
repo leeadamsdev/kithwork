@@ -48,6 +48,16 @@ services:
       retries: 30
       start_period: 5s
 
+  telemetry:
+    image: grafana/otel-lgtm:0.39.0@sha256:4c8056c9c05fcb3c8fd93800e85334bfd79b4d0271b47a54a121a64af41fe1fe
+    profiles: [telemetry]
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - telemetry-data:/data
+
 volumes:
   postgres-data:
   redis-data:
+  telemetry-data:

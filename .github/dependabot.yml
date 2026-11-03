@@ -18,7 +18,32 @@ updates:
       # Revisit with typescript-eslint upgrades; 8.72.1 supports TypeScript <6.1.
       - dependency-name: typescript
         versions: [">=6.1.0"]
+      # @fastify/otel 0.21.4 requires the OpenTelemetry 2.x / 0.223.x family.
+      - dependency-name: "@opentelemetry/api"
+        versions: [">=1.10.0"]
+      - dependency-name: "@opentelemetry/context-async-hooks"
+        versions: [">=3.0.0"]
+      - dependency-name: "@opentelemetry/core"
+        versions: [">=3.0.0"]
+      - dependency-name: "@opentelemetry/resources"
+        versions: [">=3.0.0"]
+      - dependency-name: "@opentelemetry/sdk-*"
+        versions: [">=3.0.0"]
+      - dependency-name: "@opentelemetry/instrumentation"
+        versions: [">=0.224.0"]
+      - dependency-name: "@opentelemetry/instrumentation-http"
+        versions: [">=0.224.0"]
+      - dependency-name: "@opentelemetry/exporter-*-otlp-proto"
+        versions: [">=0.224.0"]
+      - dependency-name: "@opentelemetry/instrumentation-pg"
+        versions: [">=0.77.0"]
+      - dependency-name: "@opentelemetry/instrumentation-pino"
+        versions: [">=0.70.0"]
     groups:
+      trpc:
+        patterns: ["@trpc/*"]
+      opentelemetry:
+        patterns: ["@opentelemetry/*", "@fastify/otel", "import-in-the-middle"]
       eslint:
         patterns:
           - eslint

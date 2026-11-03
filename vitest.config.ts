@@ -7,6 +7,7 @@ export default defineConfig({
       {
         test: {
           name: "tooling",
+          sequence: { groupOrder: 0 },
           environment: "node",
           include: ["tests/tooling/**/*.test.ts"],
         },
@@ -14,8 +15,12 @@ export default defineConfig({
       {
         test: {
           name: "integration",
+          sequence: { groupOrder: 1 },
           environment: "node",
-          include: ["tests/integration/**/*.test.ts"],
+          include: [
+            "tests/integration/**/*.test.ts",
+            "apps/api/tests/integration/**/*.test.ts",
+          ],
           globalSetup: ["tests/integration/global-setup.ts"],
           pool: "forks",
           maxWorkers: 2,
@@ -30,6 +35,8 @@ export default defineConfig({
       include: [
         "packages/database/src/**/*.ts",
         "packages/database/dist/**/*.js",
+        "apps/api/src/**/*.ts",
+        "apps/api/dist/**/*.js",
       ],
       reportsDirectory: "coverage/integration",
       reporter: ["text", "lcov", "json-summary"],
