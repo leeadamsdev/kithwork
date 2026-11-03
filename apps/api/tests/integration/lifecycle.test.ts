@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { createApi } from "../../src/app.js";
 import { createLogger } from "../../src/logger.js";
 import { parseConfig } from "../../src/config.js";
+import { runApi } from "../../src/runtime.js";
 import {
   createTestDatabase,
   uniqueNamespace,
@@ -187,6 +188,54 @@ describe("API lifecycle", () => {
       await admin.pool.query(`ALTER DATABASE "${name}" ALLOW_CONNECTIONS true`);
       await app.close();
       await admin.pool.end();
+    }
+  });
+  it("drains in-flight keep-alive requests and closes newly idle connections", async () => {
+    const config = parseConfig(env());
+    const app = createApi({ config, logger: createLogger("silent") });
+    const entered = Promise.withResolvers<void>();
+    const first = Promise.withResolvers<void>();
+    const second = Promise.withResolvers<void>();
+    let active = 0;
+    let closed = false;
+    app.get<{ Params: { name: string } }>(
+      "/drain-probe/:name",
+      async (request) => {
+        if (++active === 2) entered.resolve();
+        await (request.params.name === "first"
+          ? first.promise
+          : second.promise);
+        return { name: request.params.name };
+      },
+    );
+    const stop = await runApi(app, config, () => Promise.resolve());
+    const address = app.server.address();
+    if (!address || typeof address === "string")
+      throw new Error("Missing API listener");
+    const firstResponse = fetch(
+      `http://127.0.0.1:${address.port}/drain-probe/first`,
+    );
+    const secondResponse = fetch(
+      `http://127.0.0.1:${address.port}/drain-probe/second`,
+    );
+    try {
+      await entered.promise;
+      const closing = stop().then(() => {
+        closed = true;
+      });
+      first.resolve();
+      expect(await (await firstResponse).json()).toEqual({ name: "first" });
+      expect(closed).toBe(false);
+      second.resolve();
+      expect(await (await secondResponse).json()).toEqual({ name: "second" });
+      await expect.poll(() => closed, { timeout: 1000 }).toBe(true);
+      await closing;
+    } finally {
+      first.resolve();
+      second.resolve();
+      await Promise.allSettled([firstResponse, secondResponse]);
+      app.server.closeIdleConnections();
+      await stop();
     }
   });
   it.skipIf(process.platform === "win32")(
