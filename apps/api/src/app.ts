@@ -112,6 +112,8 @@ export function createApi({
       },
     });
   app.addHook("onResponse", async (request, reply) => {
+    // In-flight requests can become idle after close() reaps the existing idle sockets.
+    if (draining) app.server.closeIdleConnections();
     if (request.routeOptions.url?.startsWith("/health/")) return;
     duration.record(reply.elapsedTime / 1000, {
       "http.route": request.routeOptions.url ?? "unmatched",
