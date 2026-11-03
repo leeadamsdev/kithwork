@@ -9,9 +9,17 @@ catalog:
 overrides:
   # GHSA-g3hv-75wg-m249: remove once the lint tooling adopts patched minimatch.
   "minimatch@10.2.6": 11.0.3
+  # Testcontainers archive dependencies: GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249.
+  "archiver-utils@5.0.2>glob": 14.0.2
+  "minimatch@5.1.9": 11.0.3
 
 allowBuilds:
   esbuild: true
+  msgpackr-extract@3.0.6: true
+  # Optional SSH accelerators are unnecessary for local Docker engines.
+  cpu-features: false
+  ssh2: false
+  protobufjs: true
 
 engineStrict: true
 # Resolve dependency engines against our target, including on Dependabot's older host.

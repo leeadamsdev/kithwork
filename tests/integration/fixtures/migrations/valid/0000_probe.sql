@@ -1,0 +1,1 @@
+CREATE TABLE migration_probe (id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, value text NOT NULL);

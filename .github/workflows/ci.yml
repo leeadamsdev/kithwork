@@ -76,12 +76,31 @@ jobs:
         id: checks
         run: pnpm exec turbo run build typecheck test:build "${{ matrix.tests }}" --force
 
-      - name: Typecheck root tooling
-        run: pnpm exec tsc --project tsconfig.json
+      - name: Check repository tooling
+        run: |
+          pnpm exec tsc --project tsconfig.json
+          pnpm exec tsc --project tests/tsconfig.json
+          pnpm exec vitest run --project tooling
 
       - name: Lint
         if: runner.os == 'Linux'
         run: pnpm exec eslint . --max-warnings 0
+
+      - name: Validate services and run integration tests
+        id: integration
+        if: runner.os == 'Linux'
+        run: |
+          docker compose config --quiet
+          pnpm exec vitest run --project integration --coverage
+
+      - name: Upload integration diagnostics
+        if: ${{ !cancelled() && runner.os == 'Linux' && steps.integration.outcome == 'failure' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: integration-diagnostics
+          path: test-results/integration/
+          if-no-files-found: ignore
+          retention-days: 3
 
       - name: Save dependency store
         if: github.ref == 'refs/heads/main' && steps.dependency-cache.outputs.cache-hit != 'true'
@@ -100,5 +119,7 @@ jobs:
           path: |
             packages/*/coverage/lcov.info
             packages/*/coverage/coverage-summary.json
+            coverage/integration/lcov.info
+            coverage/integration/coverage-summary.json
           if-no-files-found: error
           retention-days: 7

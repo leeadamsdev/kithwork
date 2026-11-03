@@ -27,7 +27,13 @@ export default defineConfig([
           paths: builtinModules,
           patterns: [
             {
-              group: ["node:*", "@kithwork/backend", "@kithwork/backend/**"],
+              group: [
+                "node:*",
+                "@kithwork/backend",
+                "@kithwork/backend/**",
+                "@kithwork/database",
+                "@kithwork/database/**",
+              ],
               message: "Shared contracts must remain browser-safe.",
             },
           ],

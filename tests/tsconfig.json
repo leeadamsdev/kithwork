@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    // This project consumes Drizzle's declarations through @kithwork/database.
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"]
+}

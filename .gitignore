@@ -4,6 +4,7 @@ node_modules/
 # Generated output
 dist/
 coverage/
+test-results/
 *.tsbuildinfo
 .turbo/
 

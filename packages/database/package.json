@@ -1,0 +1,39 @@
+{
+  "name": "@kithwork/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": {
+        "import": "./dist/index.js"
+      }
+    },
+    "./migrate": {
+      "types": "./dist/migrate.d.ts",
+      "node": {
+        "import": "./dist/migrate.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
+    "clean": "node scripts/clean.ts",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pg": "8.23.1",
+    "typescript": "catalog:"
+  }
+}
