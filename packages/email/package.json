@@ -38,7 +38,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/react": "19.3.0",
-    "@types/react-dom": "19.2.3",
+    "@types/react-dom": "19.3.0",
     "@types/html-to-text": "9.0.4",
     "@types/prismjs": "1.26.6",
     "@types/css-tree": "3.2.0",
