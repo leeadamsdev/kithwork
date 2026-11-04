@@ -8,8 +8,8 @@ export async function initializeEnvironment(
 ): Promise<boolean> {
   try {
     const content = (await readFile(source, "utf8")).replace(
-      /^MAIL_ENCRYPTION_KEY=\r?$/m,
-      `MAIL_ENCRYPTION_KEY=${randomBytes(32).toString("base64")}`,
+      /^(AUTH_SECRET|MAIL_ENCRYPTION_KEY)=\r?$/gm,
+      (_match, name: string) => `${name}=${randomBytes(32).toString("base64")}`,
     );
     await writeFile(target, content, { flag: "wx", mode: 0o600 });
     return true;

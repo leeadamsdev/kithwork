@@ -1,6 +1,7 @@
 import type { ApiConfig } from "./config.js";
 import type { SpanExporter } from "@opentelemetry/sdk-trace";
 import type { PushMetricExporter } from "@opentelemetry/sdk-metrics";
+import { safeRequestPath } from "@kithwork/logging/request-path";
 
 export async function startTelemetry(
   config: ApiConfig["telemetry"],
@@ -108,6 +109,10 @@ export async function startTelemetry(
     "secret",
     "api_key",
     "code",
+    "callbackURL",
+    "redirectTo",
+    "errorCallbackURL",
+    "newUserCallbackURL",
   ];
   const unregister = registerInstrumentations({
     tracerProvider: traceProvider,
@@ -118,6 +123,9 @@ export async function startTelemetry(
           request.url?.split("?", 1)[0]?.startsWith("/health/") ?? false,
         redactedQueryParams: querySecrets,
         redactedQueryParamsServer: querySecrets,
+        startIncomingSpanHook: (request) => ({
+          "url.path": safeRequestPath(request.url ?? "/"),
+        }),
       }),
       new FastifyOtelInstrumentation({
         registerOnInitialization: true,
@@ -125,7 +133,7 @@ export async function startTelemetry(
         instrumentHooks: false,
         recordExceptions: false,
         requestHook: (span, request) => {
-          span.setAttribute("url.path", request.url.split("?", 1)[0] ?? "/");
+          span.setAttribute("url.path", safeRequestPath(request.url));
         },
       }),
       new PgInstrumentation({ enhancedDatabaseReporting: false }),

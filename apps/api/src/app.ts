@@ -1,6 +1,10 @@
 import Fastify, { LogController, type FastifyBaseLogger } from "fastify";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
+import cors from "@fastify/cors";
+import { fromNodeHeaders } from "better-auth/node";
+import { createEmailProducer } from "@kithwork/email";
+import { entityIdSchema } from "@kithwork/contracts";
 import {
   fastifyTRPCPlugin,
   type FastifyTRPCPluginOptions,
@@ -12,6 +16,9 @@ import { randomUUID } from "node:crypto";
 import type { ApiConfig } from "./config.js";
 import { registerHealth } from "./health.js";
 import { appRouter, type AppRouter } from "./trpc/router.js";
+import { createAuth } from "./auth.js";
+import { registerAuthRoutes } from "./auth-routes.js";
+import { TRPCError } from "@trpc/server";
 
 export function createApi({
   config,
@@ -75,11 +82,11 @@ export function createApi({
       );
   });
   app.addHook("onReady", async () => {
-    const probe = { text: "SELECT 1", query_timeout: 1000 };
-    await Promise.all([
-      pool.query(probe),
-      redis.connect().then(() => redis.ping()),
-    ]);
+    const probe = {
+      text: "SELECT 1 FROM auth_user LIMIT 0",
+      query_timeout: 1000,
+    };
+    await Promise.all([pool.query(probe), redis.ping()]);
   });
   app.register(helmet, {
     ...(config.environment !== "production"
@@ -97,6 +104,13 @@ export function createApi({
     max: config.rateLimitMax,
     timeWindow: 60000,
     skipOnError: false,
+  });
+  app.register(cors, {
+    origin: (origin, done) => done(null, origin === config.auth.webOrigin),
+    credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+    maxAge: 600,
   });
   app.addHook("onRequest", async (request, reply) => {
     reply.header("x-request-id", request.id);
@@ -150,20 +164,62 @@ export function createApi({
     );
   });
   registerHealth(app, pool, redis, () => draining);
-  app.register(fastifyTRPCPlugin, {
-    prefix: "/trpc",
-    trpcOptions: {
-      router: appRouter,
-      maxBatchSize: 10,
-      createContext: ({ req }) => ({ requestId: req.id, log: req.log, db }),
-      onError: ({ error, ctx, path }) => {
-        if (error.code === "INTERNAL_SERVER_ERROR")
-          (ctx?.log ?? app.log).error(
-            { err: error.cause, procedure: path },
-            "RPC failed",
-          );
-      },
-    } satisfies FastifyTRPCPluginOptions<AppRouter>["trpcOptions"],
+  app.register(async (authenticatedApp) => {
+    await redis.connect();
+    const producer = await createEmailProducer({
+      redisUrl: config.redisUrl,
+      encryptionKey: config.auth.encryptionKey,
+      prefix: config.auth.emailQueuePrefix,
+      onError: () => app.log.error("Email queue connection failed"),
+    });
+    authenticatedApp.addHook("onClose", () => producer.close());
+    const auth = createAuth({
+      config,
+      db,
+      logger: app.log,
+      sendEmail: (message, requestId) =>
+        producer.enqueue(message, requestId ? { requestId } : {}),
+    });
+    registerAuthRoutes(authenticatedApp, auth, config);
+    authenticatedApp.register(fastifyTRPCPlugin, {
+      prefix: "/trpc",
+      trpcOptions: {
+        router: appRouter,
+        maxBatchSize: 10,
+        responseMeta: () => ({ headers: { "cache-control": "no-store" } }),
+        createContext: async ({ req }) => {
+          const session = await auth.api
+            .getSession({
+              headers: fromNodeHeaders(req.headers),
+              query: { disableRefresh: true },
+            })
+            .catch(() => {
+              req.log.error("Authentication session lookup failed");
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Session unavailable",
+              });
+            });
+          const user =
+            session?.user.emailVerified === true
+              ? {
+                  id: entityIdSchema.parse(session.user.id),
+                  name: session.user.name,
+                  email: session.user.email,
+                  emailVerified: true as const,
+                }
+              : null;
+          return { requestId: req.id, log: req.log, db, user };
+        },
+        onError: ({ error, ctx, path }) => {
+          if (error.code === "INTERNAL_SERVER_ERROR")
+            (ctx?.log ?? app.log).error(
+              { err: error.cause, procedure: path },
+              "RPC failed",
+            );
+        },
+      } satisfies FastifyTRPCPluginOptions<AppRouter>["trpcOptions"],
+    });
   });
   return app;
 }

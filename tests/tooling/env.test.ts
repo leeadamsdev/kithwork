@@ -4,6 +4,30 @@ import { join } from "node:path";
 import { expect, it } from "vitest";
 import { initializeEnvironment } from "../../scripts/env-init.js";
 
+it("generates independent authentication and email secrets", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "kithwork-auth-env-"));
+  try {
+    const source = join(directory, ".env.example");
+    const target = join(directory, ".env");
+    await writeFile(source, "AUTH_SECRET=\nMAIL_ENCRYPTION_KEY=\n");
+    await initializeEnvironment(source, target);
+    const contents = await readFile(target, "utf8");
+    const secrets = contents
+      .trim()
+      .split("\n")
+      .map((line) => line.slice(line.indexOf("=") + 1));
+    expect(secrets).toHaveLength(2);
+    expect(secrets.every((value) => /^[A-Za-z0-9+/]{43}=$/.test(value))).toBe(
+      true,
+    );
+    expect(secrets[0]).not.toBe(secrets[1]);
+    expect(await initializeEnvironment(source, target)).toBe(false);
+    expect(await readFile(target, "utf8")).toBe(contents);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 it("generates a unique local email key and preserves it on repeated setup", async () => {
   const directory = await mkdtemp(join(tmpdir(), "kithwork-env-"));
   try {

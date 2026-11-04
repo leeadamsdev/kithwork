@@ -8,6 +8,8 @@
       "env": [
         "NODE_ENV",
         "API_*",
+        "AUTH_*",
+        "WEB_ORIGIN",
         "LOG_LEVEL",
         "DATABASE_*",
         "REDIS_URL",

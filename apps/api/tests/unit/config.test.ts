@@ -4,9 +4,42 @@ import { parseConfig } from "../../src/config.js";
 const required = {
   DATABASE_URL: "postgresql://user:password@localhost/kithwork",
   REDIS_URL: "redis://:password@localhost:6379",
+  AUTH_SECRET: "test-only-auth-secret-with-at-least-32-characters",
+  MAIL_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString("base64"),
 };
 
 describe("API configuration", () => {
+  it("requires strong authentication secrets and canonical origins", () => {
+    expect(parseConfig(required)).toMatchObject({
+      auth: {
+        baseURL: "http://127.0.0.1:3001",
+        webOrigin: "http://127.0.0.1:5173",
+        rateLimitMax: 10,
+      },
+    });
+    for (const invalid of [
+      { AUTH_SECRET: undefined },
+      { AUTH_SECRET: "short" },
+      { MAIL_ENCRYPTION_KEY: "invalid-key" },
+      { AUTH_BASE_URL: "https://user:password@example.com" },
+      { WEB_ORIGIN: "https://example.com/path" },
+      { WEB_ORIGIN: "https://example.com?secret=private" },
+      { NODE_ENV: "production" },
+      { API_AUTH_RATE_LIMIT_MAX: "0" },
+    ]) {
+      expect(() => parseConfig({ ...required, ...invalid })).toThrow(
+        "Invalid API configuration",
+      );
+    }
+    expect(
+      parseConfig({
+        ...required,
+        NODE_ENV: "production",
+        AUTH_BASE_URL: "https://api.kithwork.test",
+        WEB_ORIGIN: "https://app.kithwork.test",
+      }),
+    ).toMatchObject({ environment: "production" });
+  });
   it("defaults to local-only listening and disabled telemetry", () => {
     expect(parseConfig(required)).toMatchObject({
       host: "127.0.0.1",
