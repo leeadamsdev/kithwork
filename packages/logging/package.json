@@ -5,6 +5,12 @@
   "type": "module",
   "license": "MIT",
   "exports": {
+    "./request-path": {
+      "types": "./dist/request-path.d.ts",
+      "node": {
+        "import": "./dist/request-path.js"
+      }
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "node": {

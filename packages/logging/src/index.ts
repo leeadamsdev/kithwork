@@ -1,4 +1,6 @@
 import { pino, type DestinationStream } from "pino";
+import { safeRequestPath } from "./request-path.js";
+
 export function createLogger(level: string, destination?: DestinationStream) {
   return pino(
     {
@@ -26,7 +28,7 @@ export function createLogger(level: string, destination?: DestinationStream) {
         req: (req: { id: string; method: string; url: string }) => ({
           id: req.id,
           method: req.method,
-          path: req.url.split("?", 1)[0],
+          path: safeRequestPath(req.url),
         }),
         res: (res: { statusCode: number }) => ({ statusCode: res.statusCode }),
       },

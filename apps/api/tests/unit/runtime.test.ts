@@ -2,8 +2,10 @@ import Fastify from "fastify";
 import { expect, it } from "vitest";
 import { parseConfig } from "../../src/config.js";
 import { runApi } from "../../src/runtime.js";
+import { apiTestEnvironment } from "../fixtures/config.js";
 
 const config = parseConfig({
+  ...apiTestEnvironment,
   DATABASE_URL: "postgresql://localhost/test",
   REDIS_URL: "redis://localhost",
   API_PORT: "0",

@@ -2,6 +2,32 @@ import { Writable } from "node:stream";
 import { expect, it } from "vitest";
 import { createLogger } from "../src/index.js";
 
+it("redacts password-reset tokens embedded in request paths", () => {
+  const lines: string[] = [];
+  const stream = new Writable({
+    write(chunk: Buffer, _encoding, done) {
+      lines.push(chunk.toString());
+      done();
+    },
+  });
+  const log = createLogger("info", stream);
+  log.info(
+    {
+      req: {
+        id: "request-id",
+        method: "GET",
+        url: "/api/auth/reset-password/private-reset-token?callbackURL=private-redirect",
+      },
+    },
+    "Request completed",
+  );
+  expect(lines[0]).not.toContain("private-reset-token");
+  expect(lines[0]).not.toContain("private-redirect");
+  expect(JSON.parse(lines[0]!)).toMatchObject({
+    req: { path: "/api/auth/reset-password/[Redacted]" },
+  });
+});
+
 it("logs request identity without URL queries, headers, bodies or credentials", () => {
   const lines: string[] = [];
   const stream = new Writable({

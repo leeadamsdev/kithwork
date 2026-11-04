@@ -3,12 +3,16 @@ import { Redis } from "ioredis";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll } from "vitest";
 import { integrationServices } from "./context.js";
+import { migrateDatabase } from "@kithwork/database/migrate";
+import { fileURLToPath } from "node:url";
 
 export function uniqueNamespace(): string {
   return `kw_test_${randomUUID().replaceAll("-", "")}`;
 }
 
-export async function createTestDatabase() {
+export async function createTestDatabase({
+  migrate = false,
+}: { migrate?: boolean } = {}) {
   const name = uniqueNamespace();
   const { postgresUrl } = integrationServices();
   const errors: Error[] = [];
@@ -33,6 +37,25 @@ export async function createTestDatabase() {
     maxConnections: 2,
     onPoolError,
   });
+  if (migrate) {
+    try {
+      await migrateDatabase({
+        connectionString: url.toString(),
+        onPoolError,
+        migrationsFolder: fileURLToPath(
+          new URL("../../packages/database/migrations/", import.meta.url),
+        ),
+      });
+    } catch (error) {
+      try {
+        await client.pool.end();
+        await admin.pool.query(`DROP DATABASE "${name}"`);
+      } finally {
+        await admin.pool.end();
+      }
+      throw error;
+    }
+  }
   return {
     ...client,
     connectionString: url.toString(),

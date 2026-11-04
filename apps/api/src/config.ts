@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+const origin = z
+  .url({ protocol: /^https?$/ })
+  .refine((value) => {
+    const url = new URL(value);
+    return (
+      !url.username &&
+      !url.password &&
+      url.pathname === "/" &&
+      !url.search &&
+      !url.hash
+    );
+  })
+  .transform((value) => new URL(value).origin)
+  .pipe(z.string().max(512));
+
 const integer = (min: number, max: number) =>
   z
     .string()
@@ -19,6 +34,20 @@ const schema = z
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
     DATABASE_MAX_CONNECTIONS: integer(1, 100).default(10),
     REDIS_URL: z.url({ protocol: /^rediss?$/ }),
+    AUTH_SECRET: z.string().min(32),
+    AUTH_BASE_URL: origin.default("http://127.0.0.1:3001"),
+    WEB_ORIGIN: origin.default("http://127.0.0.1:5173"),
+    API_AUTH_RATE_LIMIT_MAX: integer(1, 1000).default(10),
+    MAIL_ENCRYPTION_KEY: z
+      .string()
+      .regex(/^[A-Za-z0-9+/]{43}=$/)
+      .refine(
+        (value) => Buffer.from(value, "base64").toString("base64") === value,
+      ),
+    EMAIL_QUEUE_PREFIX: z
+      .string()
+      .regex(/^[a-zA-Z0-9:_-]+$/)
+      .default("kithwork"),
     API_RATE_LIMIT_MAX: integer(1, 100000).default(600),
     API_RATE_LIMIT_NAMESPACE: z
       .string()
@@ -28,6 +57,17 @@ const schema = z
     OTEL_EXPORTER_OTLP_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
   })
   .superRefine((env, ctx) => {
+    if (env.NODE_ENV === "production") {
+      for (const field of ["AUTH_BASE_URL", "WEB_ORIGIN"] as const) {
+        if (!env[field].startsWith("https://")) {
+          ctx.addIssue({
+            code: "custom",
+            path: [field],
+            message: "HTTPS required in production",
+          });
+        }
+      }
+    }
     if (env.OTEL_SDK_DISABLED === "false" && !env.OTEL_EXPORTER_OTLP_ENDPOINT) {
       ctx.addIssue({
         code: "custom",
@@ -56,6 +96,14 @@ export function parseConfig(env: Record<string, string | undefined>) {
     redisUrl: value.REDIS_URL,
     rateLimitMax: value.API_RATE_LIMIT_MAX,
     rateLimitNamespace: value.API_RATE_LIMIT_NAMESPACE,
+    auth: {
+      secret: value.AUTH_SECRET,
+      baseURL: value.AUTH_BASE_URL,
+      webOrigin: value.WEB_ORIGIN,
+      rateLimitMax: value.API_AUTH_RATE_LIMIT_MAX,
+      encryptionKey: value.MAIL_ENCRYPTION_KEY,
+      emailQueuePrefix: value.EMAIL_QUEUE_PREFIX,
+    },
     telemetry:
       value.OTEL_SDK_DISABLED === "false"
         ? {

@@ -82,7 +82,7 @@ it("applies generated SQL, preserves data on upgrade, and does not reapply migra
   }
 }, 30000);
 
-it("runs the compiled migration command with the committed empty application journal", async () => {
+it("runs the compiled migration command with the committed application journal", async () => {
   const cli = fileURLToPath(
     new URL("../../packages/database/dist/migrate-cli.js", import.meta.url),
   );

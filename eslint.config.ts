@@ -36,6 +36,7 @@ export default defineConfig([
                 "@kithwork/email",
                 "@kithwork/email/**",
                 "@kithwork/logging",
+                "@kithwork/logging/**",
               ],
               message: "Shared contracts must remain browser-safe.",
             },

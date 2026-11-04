@@ -38,3 +38,11 @@ minimumReleaseAgeExclude:
   - "@vitest/mocker@5.1.0"
   - "@vitest/spy@5.1.0"
   - vitest@5.1.0
+  - "@better-auth/core@1.7.17"
+  - "@better-auth/drizzle-adapter@1.7.17"
+  - "@better-auth/kysely-adapter@1.7.17"
+  - "@better-auth/memory-adapter@1.7.17"
+  - "@better-auth/mongo-adapter@1.7.17"
+  - "@better-auth/prisma-adapter@1.7.17"
+  - "@better-auth/telemetry@1.7.17"
+  - better-auth@1.7.17

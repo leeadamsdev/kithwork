@@ -1,5 +1,5 @@
-import { initTRPC } from "@trpc/server";
-import { systemInfoSchema } from "@kithwork/contracts";
+import { initTRPC, TRPCError } from "@trpc/server";
+import { authenticatedUserSchema, systemInfoSchema } from "@kithwork/contracts";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { apiInfo } from "../metadata.js";
 import type { ApiContext } from "./context.js";
@@ -47,6 +47,15 @@ const procedure = t.procedure.use(async ({ path, type, ctx, next }) => {
 });
 
 export const appRouter = t.router({
+  auth: t.router({
+    me: procedure
+      .use(({ ctx, next }) => {
+        if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        return next({ ctx: { ...ctx, user: ctx.user } });
+      })
+      .output(authenticatedUserSchema)
+      .query(({ ctx }) => ctx.user),
+  }),
   system: t.router({
     info: procedure.output(systemInfoSchema).query(() => apiInfo),
   }),

@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
+import { apiTestEnvironment } from "./config.js";
 
 export async function startApiProcess(
   env: Record<string, string>,
@@ -14,6 +15,7 @@ export async function startApiProcess(
       cwd: root,
       env: {
         ...process.env,
+        ...apiTestEnvironment,
         NODE_ENV: "test",
         OTEL_SDK_DISABLED: "true",
         ...env,

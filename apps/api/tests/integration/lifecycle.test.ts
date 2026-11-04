@@ -16,17 +16,19 @@ import { createServer, connect } from "node:net";
 import type { Socket } from "node:net";
 import { once } from "node:events";
 import { setTimeout as delay } from "node:timers/promises";
+import { apiTestEnvironment } from "../fixtures/config.js";
 import { createDatabase } from "@kithwork/database";
 
 describe("API lifecycle", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
   beforeAll(async () => {
-    database = await createTestDatabase();
+    database = await createTestDatabase({ migrate: true });
   });
   afterAll(async () => {
     await database?.close();
   });
   const env = () => ({
+    ...apiTestEnvironment,
     DATABASE_URL: database.connectionString,
     REDIS_URL: integrationServices().redisUrl,
     API_PORT: "0",

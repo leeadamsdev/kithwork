@@ -9,13 +9,15 @@ import {
   uniqueNamespace,
 } from "../../../../tests/integration/fixtures.js";
 import { integrationServices } from "../../../../tests/integration/context.js";
+import { apiTestEnvironment } from "../fixtures/config.js";
 
 describe("API HTTP boundary", () => {
   let database: Awaited<ReturnType<typeof createTestDatabase>>;
   let app: ReturnType<typeof createApi>;
   beforeAll(async () => {
-    database = await createTestDatabase();
+    database = await createTestDatabase({ migrate: true });
     const config = parseConfig({
+      ...apiTestEnvironment,
       DATABASE_URL: database.connectionString,
       REDIS_URL: integrationServices().redisUrl,
       API_RATE_LIMIT_NAMESPACE: uniqueNamespace(),
@@ -57,6 +59,18 @@ describe("API HTTP boundary", () => {
     expect(response.json()).toEqual({
       result: { data: { name: "kithwork-api", version: "0.0.0" } },
     });
+  });
+  it("prevents caching tRPC successes, errors and mixed batches", async () => {
+    for (const [url, status] of [
+      ["/trpc/system.info", 200],
+      ["/trpc/auth.me", 401],
+      ["/trpc/does-not-exist", 404],
+      ["/trpc/system.info,auth.me?batch=1", 207],
+    ] as const) {
+      const response = await app.inject(url);
+      expect(response.statusCode).toBe(status);
+      expect(response.headers["cache-control"]).toBe("no-store");
+    }
   });
   it("preserves safe tRPC errors and request correlation", async () => {
     const response = await app.inject("/trpc/does-not-exist");
@@ -102,8 +116,9 @@ describe("API HTTP boundary", () => {
 });
 
 it("shares Redis-backed rate limits across API instances and unmatched URLs while exempting health probes", async () => {
-  const database = await createTestDatabase();
+  const database = await createTestDatabase({ migrate: true });
   const config = parseConfig({
+    ...apiTestEnvironment,
     DATABASE_URL: database.connectionString,
     REDIS_URL: integrationServices().redisUrl,
     API_RATE_LIMIT_MAX: "2",

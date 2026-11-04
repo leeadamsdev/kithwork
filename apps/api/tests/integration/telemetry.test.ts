@@ -9,7 +9,7 @@ import { createServer } from "node:http";
 import { once } from "node:events";
 
 it("exports real HTTP, Fastify, RPC and PostgreSQL spans, correlated logs and bounded metrics", async () => {
-  const database = await createTestDatabase();
+  const database = await createTestDatabase({ migrate: true });
   let child: Awaited<ReturnType<typeof startApiProcess>> | undefined;
   try {
     child = await startApiProcess(
@@ -28,6 +28,10 @@ it("exports real HTTP, Fastify, RPC and PostgreSQL spans, correlated logs and bo
       `${child.address}/trpc/system.info?input=${encodeURIComponent(JSON.stringify("private-input"))}`,
     );
     await fetch(`${child.address}/database-probe`);
+    await fetch(
+      `${child.address}/api/auth/reset-password/private-reset-path-marker?callbackURL=${encodeURIComponent("http://127.0.0.1:5173/private-callback-marker")}`,
+      { redirect: "manual" },
+    );
     await fetch(`${child.address}/finish`);
     expect(await child.exited).toEqual({ code: 0, signal: null });
     const output = child.stdout();
@@ -63,6 +67,8 @@ it("exports real HTTP, Fastify, RPC and PostgreSQL spans, correlated logs and bo
     expect(output).toContain('"trace_id"');
     expect(output).not.toContain("private-input");
     expect(output).not.toContain("private-query-value");
+    expect(output).not.toContain("private-reset-path-marker");
+    expect(output).not.toContain("private-callback-marker");
     expect(JSON.stringify(report.telemetry.metrics)).toContain(
       "kithwork.http.request.duration",
     );
@@ -101,7 +107,7 @@ it("flushes HTTP/protobuf traces and metrics to an OTLP receiver on shutdown", a
   const address = receiver.address();
   if (!address || typeof address === "string")
     throw new Error("Missing OTLP listener");
-  const database = await createTestDatabase();
+  const database = await createTestDatabase({ migrate: true });
   let child: Awaited<ReturnType<typeof startApiProcess>> | undefined;
   try {
     child = await startApiProcess(
