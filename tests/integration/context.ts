@@ -3,6 +3,9 @@ import { inject } from "vitest";
 export interface IntegrationServices {
   postgresUrl: string;
   redisUrl: string;
+  mailpitUrl: string;
+  smtpHost: string;
+  smtpPort: number;
 }
 
 declare module "vitest" {

@@ -9,6 +9,7 @@ describe("integration service configuration", () => {
     const images = await readServiceImages();
     expect(images.postgres).toMatch(/^postgres:.+@sha256:[a-f0-9]{64}$/);
     expect(images.redis).toMatch(/^redis:.+@sha256:[a-f0-9]{64}$/);
+    expect(images.mailpit).toMatch(/^axllent\/mailpit:.+@sha256:[a-f0-9]{64}$/);
   });
 
   it("accepts unrelated Compose settings while extracting only service images", () => {
@@ -17,10 +18,15 @@ describe("integration service configuration", () => {
         services: {
           postgres: { image: "postgres:18", ports: ["5432:5432"] },
           redis: { image: "redis:8" },
+          mailpit: { image: "axllent/mailpit:1" },
         },
         volumes: { data: {} },
       }),
-    ).toEqual({ postgres: "postgres:18", redis: "redis:8" });
+    ).toEqual({
+      postgres: "postgres:18",
+      redis: "redis:8",
+      mailpit: "axllent/mailpit:1",
+    });
   });
 
   it.each([

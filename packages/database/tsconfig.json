@@ -6,5 +6,5 @@
     // Drizzle 0.45.4 declarations reference optional dialects and contain upstream type errors.
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "scripts/**/*.ts"]
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "drizzle.config.ts"]
 }

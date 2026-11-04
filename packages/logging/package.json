@@ -1,0 +1,32 @@
+{
+  "name": "@kithwork/logging",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": {
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "clean": "node scripts/clean.ts",
+    "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
+    "dev": "tsc --project tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc --project tsconfig.json",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "pino": "10.4.0"
+  },
+  "devDependencies": {
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "5.1.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

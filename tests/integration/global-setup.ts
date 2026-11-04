@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { StartedTestContainer } from "testcontainers";
+import { GenericContainer, Wait } from "testcontainers";
 import type { TestProject } from "vitest/node";
 import type { IntegrationServices } from "./context.js";
 import { readServiceImages } from "./services.js";
@@ -48,6 +49,12 @@ export default async function setup(project: TestProject) {
       .withStartupTimeout(120_000)
       .withLogConsumer(capture("redis"))
       .start(),
+    new GenericContainer(images.mailpit)
+      .withExposedPorts(1025, 8025)
+      .withWaitStrategy(Wait.forHttp("/readyz", 8025))
+      .withStartupTimeout(120_000)
+      .withLogConsumer(capture("mailpit"))
+      .start(),
   ]);
 
   const started: StartedTestContainer[] = results.flatMap((result) =>
@@ -77,8 +84,12 @@ export default async function setup(project: TestProject) {
       throw new AggregateError(errors, "Integration resource cleanup failed");
   }
 
-  const [postgres, redis] = results;
-  if (postgres?.status !== "fulfilled" || redis?.status !== "fulfilled") {
+  const [postgres, redis, mailpit] = results;
+  if (
+    postgres?.status !== "fulfilled" ||
+    redis?.status !== "fulfilled" ||
+    mailpit?.status !== "fulfilled"
+  ) {
     const errors = results.flatMap((result) =>
       result.status === "rejected" ? [result.reason as unknown] : [],
     );
@@ -97,6 +108,9 @@ export default async function setup(project: TestProject) {
   project.provide("services", {
     postgresUrl: postgres.value.getConnectionUri(),
     redisUrl: redis.value.getConnectionUrl(),
+    mailpitUrl: `http://${mailpit.value.getHost()}:${mailpit.value.getMappedPort(8025)}`,
+    smtpHost: mailpit.value.getHost(),
+    smtpPort: mailpit.value.getMappedPort(1025),
   } satisfies IntegrationServices);
   return cleanup;
 }

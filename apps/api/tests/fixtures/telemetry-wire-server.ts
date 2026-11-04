@@ -5,7 +5,7 @@ const config = parseConfig(process.env);
 const telemetry = await startTelemetry(config.telemetry);
 const [{ createApi }, { createLogger }, { runApi }] = await Promise.all([
   import("../../dist/app.js"),
-  import("../../dist/logger.js"),
+  import("@kithwork/logging"),
   import("../../dist/runtime.js"),
 ]);
 const app = createApi({ config, logger: createLogger("info") });

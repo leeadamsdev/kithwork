@@ -12,13 +12,14 @@
   "scripts": {
     "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
     "clean": "node scripts/clean.ts",
-    "dev": "tsx watch --tsconfig ../../tsconfig.base.json --include ../../packages/contracts/dist --include ../../packages/database/dist src/index.ts",
+    "dev": "tsx watch --tsconfig ../../tsconfig.base.json --include ../../packages/contracts/dist --include ../../packages/database/dist --include ../../packages/logging/dist src/index.ts",
     "start": "node --enable-source-maps dist/index.js",
     "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.client.json",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@kithwork/logging": "workspace:*",
     "@fastify/helmet": "13.2.0",
     "@fastify/otel": "0.21.4",
     "@fastify/rate-limit": "11.2.1",
@@ -40,7 +41,6 @@
     "fastify": "5.12.8",
     "import-in-the-middle": "3.5.3",
     "ioredis": "6.0.0",
-    "pino": "10.4.0",
     "zod": "4.6.7"
   },
   "devDependencies": {
