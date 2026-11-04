@@ -8,6 +8,10 @@ catalog:
   vitest: 5.1.0
 
 overrides:
+  # Kit 0.31.11 uses tsx; this unused legacy dependency pulls deprecated loaders.
+  "drizzle-kit@0.31.11>@esbuild-kit/esm-loader": "-"
+  # GHSA-3g3m-2fjr-6pw4: remove once React Email's CLI accepts patched glob.
+  "react-email@6.11.6>glob": 14.0.2
   # GHSA-g3hv-75wg-m249: remove once the lint tooling adopts patched minimatch.
   "minimatch@10.2.6": 11.0.3
   # Testcontainers archive dependencies: GHSA-3g3m-2fjr-6pw4 and GHSA-g3hv-75wg-m249.

@@ -1,6 +1,6 @@
 import { createApi } from "../../dist/app.js";
 import { parseConfig } from "../../dist/config.js";
-import { createLogger } from "../../dist/logger.js";
+import { createLogger } from "@kithwork/logging";
 import { runApi } from "../../dist/runtime.js";
 import { setTimeout as delay } from "node:timers/promises";
 

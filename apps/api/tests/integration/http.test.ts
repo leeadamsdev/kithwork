@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createApi } from "../../src/app.js";
 import { parseConfig } from "../../src/config.js";
-import { createLogger } from "../../src/logger.js";
+import { createLogger } from "@kithwork/logging";
 import type { AppRouter } from "../../src/trpc/router.js";
 import {
   createTestDatabase,

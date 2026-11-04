@@ -81,6 +81,7 @@ jobs:
           pnpm exec tsc --project tsconfig.json
           pnpm exec tsc --project tests/tsconfig.json
           pnpm exec vitest run --project tooling
+          pnpm db:check
 
       - name: Lint
         if: runner.os == 'Linux'

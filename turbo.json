@@ -11,6 +11,9 @@
         "LOG_LEVEL",
         "DATABASE_*",
         "REDIS_URL",
+        "MAIL_*",
+        "SMTP_*",
+        "EMAIL_*",
         "OTEL_*"
       ]
     },

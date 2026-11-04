@@ -1,6 +1,6 @@
 import { Writable } from "node:stream";
 import { expect, it } from "vitest";
-import { createLogger } from "../../src/logger.js";
+import { createLogger } from "../src/index.js";
 
 it("logs request identity without URL queries, headers, bodies or credentials", () => {
   const lines: string[] = [];

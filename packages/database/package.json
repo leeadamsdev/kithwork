@@ -23,12 +23,16 @@
     "dist"
   ],
   "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:check": "drizzle-kit check",
+    "db:migrate": "node --enable-source-maps dist/migrate-cli.js",
     "dev": "tsc --project tsconfig.build.json --watch --preserveWatchOutput",
     "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
     "clean": "node scripts/clean.ts",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
+    "zod": "4.6.7",
     "drizzle-orm": "0.45.4",
     "pg": "8.23.1"
   },

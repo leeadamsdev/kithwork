@@ -1,0 +1,28 @@
+{
+  "name": "@kithwork/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "clean": "node scripts/clean.ts",
+    "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
+    "dev": "tsx watch --tsconfig ../../tsconfig.base.json --include ../../packages/email/dist --include ../../packages/logging/dist src/index.ts",
+    "start": "node --enable-source-maps dist/index.js",
+    "typecheck": "tsc --project tsconfig.json",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@kithwork/email": "workspace:*",
+    "@kithwork/logging": "workspace:*",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "5.1.0",
+    "tsx": "4.23.15",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

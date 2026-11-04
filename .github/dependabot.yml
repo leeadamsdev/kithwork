@@ -42,6 +42,8 @@ updates:
     groups:
       trpc:
         patterns: ["@trpc/*"]
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
       opentelemetry:
         patterns: ["@opentelemetry/*", "@fastify/otel", "import-in-the-middle"]
       eslint:

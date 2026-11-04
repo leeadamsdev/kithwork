@@ -12,7 +12,7 @@ try {
   try {
     const [{ createApi }, { createLogger }, { runApi }] = await Promise.all([
       import("./app.js"),
-      import("./logger.js"),
+      import("@kithwork/logging"),
       import("./runtime.js"),
     ]);
     const app = createApi({ config, logger: createLogger(config.logLevel) });

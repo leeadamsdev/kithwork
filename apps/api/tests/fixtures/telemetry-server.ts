@@ -44,7 +44,7 @@ const telemetry = await startTelemetry(config.telemetry, {
 const [{ createApi }, { createLogger }, { runApi }, { createDatabase }] =
   await Promise.all([
     import("../../dist/app.js"),
-    import("../../dist/logger.js"),
+    import("@kithwork/logging"),
     import("../../dist/runtime.js"),
     import("@kithwork/database"),
   ]);

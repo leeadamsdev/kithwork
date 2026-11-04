@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Redis } from "ioredis";
 import { randomUUID } from "node:crypto";
 import { createApi } from "../../src/app.js";
-import { createLogger } from "../../src/logger.js";
+import { createLogger } from "@kithwork/logging";
 import { parseConfig } from "../../src/config.js";
 import { runApi } from "../../src/runtime.js";
 import {

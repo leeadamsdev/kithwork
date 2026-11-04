@@ -1,5 +1,5 @@
-import { constants } from "node:fs";
-import { copyFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 export async function initializeEnvironment(
@@ -7,7 +7,11 @@ export async function initializeEnvironment(
   target: string,
 ): Promise<boolean> {
   try {
-    await copyFile(source, target, constants.COPYFILE_EXCL);
+    const content = (await readFile(source, "utf8")).replace(
+      /^MAIL_ENCRYPTION_KEY=\r?$/m,
+      `MAIL_ENCRYPTION_KEY=${randomBytes(32).toString("base64")}`,
+    );
+    await writeFile(target, content, { flag: "wx", mode: 0o600 });
     return true;
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "EEXIST")
