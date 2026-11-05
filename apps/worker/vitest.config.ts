@@ -5,7 +5,7 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.ts"],
     coverage: {
       provider: "v8",
-      include: ["src/config.ts", "src/runtime.ts"],
+      include: ["src/config.ts", "src/platform/lifecycle/runtime.ts"],
       reporter: ["text", "lcov", "json-summary"],
     },
   },

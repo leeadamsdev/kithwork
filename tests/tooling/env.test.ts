@@ -1,11 +1,11 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { createTemporaryDirectory } from "../temporary-directory.js";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, it } from "vitest";
 import { initializeEnvironment } from "../../scripts/env-init.js";
 
 it("generates independent authentication and email secrets", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "kithwork-auth-env-"));
+  const directory = await createTemporaryDirectory("kithwork-auth-env-");
   try {
     const source = join(directory, ".env.example");
     const target = join(directory, ".env");
@@ -29,7 +29,7 @@ it("generates independent authentication and email secrets", async () => {
 });
 
 it("generates a unique local email key and preserves it on repeated setup", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "kithwork-env-"));
+  const directory = await createTemporaryDirectory("kithwork-env-");
   try {
     const source = join(directory, ".env.example");
     const first = join(directory, "first.env");
@@ -48,7 +48,7 @@ it("generates a unique local email key and preserves it on repeated setup", asyn
 });
 
 it("initializes local configuration without overwriting an existing environment", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "kithwork-env-"));
+  const directory = await createTemporaryDirectory("kithwork-env-");
   try {
     const source = join(directory, ".env.example");
     const target = join(directory, ".env");

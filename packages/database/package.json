@@ -13,9 +13,9 @@
       }
     },
     "./migrate": {
-      "types": "./dist/migrate.d.ts",
+      "types": "./dist/migrations/run.d.ts",
       "node": {
-        "import": "./dist/migrate.js"
+        "import": "./dist/migrations/run.js"
       }
     }
   },
@@ -25,7 +25,7 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
-    "db:migrate": "node --enable-source-maps dist/migrate-cli.js",
+    "db:migrate": "node --enable-source-maps dist/migrations/cli.js",
     "dev": "tsc --project tsconfig.build.json --watch --preserveWatchOutput",
     "build": "node scripts/clean.ts && tsc --project tsconfig.build.json",
     "clean": "node scripts/clean.ts",

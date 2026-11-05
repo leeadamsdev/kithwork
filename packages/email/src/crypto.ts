@@ -35,13 +35,19 @@ export function parseEncryptionKey(value: string): Buffer {
   return key;
 }
 
-function aad(expiresAt: number) {
-  return Buffer.from(`kithwork:email:v1:${expiresAt}`);
+function aad(expiresAt: number, context?: string) {
+  return Buffer.from(
+    `kithwork:email:v1:${expiresAt}${context ? `:${context}` : ""}`,
+  );
 }
-export function sealMessage(message: EmailMessage, key: Buffer): SealedMessage {
+export function sealMessage(
+  message: EmailMessage,
+  key: Buffer,
+  context?: string,
+): SealedMessage {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
-  cipher.setAAD(aad(message.expiresAt));
+  cipher.setAAD(aad(message.expiresAt, context));
   const data = Buffer.concat([
     cipher.update(JSON.stringify(message), "utf8"),
     cipher.final(),
@@ -54,7 +60,11 @@ export function sealMessage(message: EmailMessage, key: Buffer): SealedMessage {
     data: data.toString("base64"),
   };
 }
-export function openMessage(value: unknown, key: Buffer): EmailMessage {
+export function openMessage(
+  value: unknown,
+  key: Buffer,
+  context?: string,
+): EmailMessage {
   try {
     const envelope = envelopeSchema.parse(value);
     const decipher = createDecipheriv(
@@ -62,7 +72,7 @@ export function openMessage(value: unknown, key: Buffer): EmailMessage {
       key,
       Buffer.from(envelope.iv, "base64"),
     );
-    decipher.setAAD(aad(envelope.expiresAt));
+    decipher.setAAD(aad(envelope.expiresAt, context));
     decipher.setAuthTag(Buffer.from(envelope.tag, "base64"));
     const text = Buffer.concat([
       decipher.update(Buffer.from(envelope.data, "base64")),

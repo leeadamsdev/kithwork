@@ -8,9 +8,14 @@ export async function startApiProcess(
   fixture?: "drain" | "telemetry" | "telemetry-wire",
 ) {
   const root = fileURLToPath(new URL("../../", import.meta.url));
+  const fixtures = {
+    drain: "platform/lifecycle/drain-server.ts",
+    telemetry: "platform/observability/telemetry-server.ts",
+    "telemetry-wire": "platform/observability/telemetry-wire-server.ts",
+  };
   const child = spawn(
     process.execPath,
-    [fixture ? `tests/fixtures/${fixture}-server.ts` : "dist/index.js"],
+    [fixture ? `tests/fixtures/${fixtures[fixture]}` : "dist/index.js"],
     {
       cwd: root,
       env: {

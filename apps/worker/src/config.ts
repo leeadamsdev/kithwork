@@ -13,6 +13,8 @@ const schema = z
     LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
       .default("info"),
+    DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+    DATABASE_MAX_CONNECTIONS: integer(1, 100).default(5),
     REDIS_URL: z.url({ protocol: /^rediss?$/ }),
     MAIL_ENCRYPTION_KEY: z
       .string()
@@ -62,6 +64,8 @@ export function parseWorkerConfig(env: Record<string, string | undefined>) {
     );
   const value = parsed.data;
   return {
+    databaseUrl: value.DATABASE_URL,
+    databaseMaxConnections: value.DATABASE_MAX_CONNECTIONS,
     logLevel: value.LOG_LEVEL,
     redisUrl: value.REDIS_URL,
     encryptionKey: value.MAIL_ENCRYPTION_KEY,
@@ -79,3 +83,4 @@ export function parseWorkerConfig(env: Record<string, string | undefined>) {
     },
   };
 }
+export type WorkerConfig = ReturnType<typeof parseWorkerConfig>;

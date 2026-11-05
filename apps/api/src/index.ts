@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseConfig } from "./config.js";
-import { startTelemetry } from "./telemetry.js";
+import { startTelemetry } from "./platform/observability/telemetry.js";
 
 const envPath = fileURLToPath(new URL("../../../.env", import.meta.url));
 if (existsSync(envPath)) process.loadEnvFile(envPath);
@@ -13,7 +13,7 @@ try {
     const [{ createApi }, { createLogger }, { runApi }] = await Promise.all([
       import("./app.js"),
       import("@kithwork/logging"),
-      import("./runtime.js"),
+      import("./platform/lifecycle/runtime.js"),
     ]);
     const app = createApi({ config, logger: createLogger(config.logLevel) });
     await runApi(app, config, telemetry.shutdown);

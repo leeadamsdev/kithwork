@@ -6,15 +6,21 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "types": "./dist/producer.d.ts",
+      "types": "./dist/queue/producer.d.ts",
       "node": {
-        "import": "./dist/producer.js"
+        "import": "./dist/queue/producer.js"
+      }
+    },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "node": {
+        "import": "./dist/crypto.js"
       }
     },
     "./worker": {
-      "types": "./dist/worker.d.ts",
+      "types": "./dist/queue/worker.d.ts",
       "node": {
-        "import": "./dist/worker.js"
+        "import": "./dist/queue/worker.js"
       }
     }
   },

@@ -1,7 +1,8 @@
-import { createEmailWorker, createSmtpDelivery } from "@kithwork/email/worker";
+import { createSmtpDelivery } from "@kithwork/email/worker";
+import { createWorker } from "./app.js";
 import { createLogger } from "@kithwork/logging";
 import { parseWorkerConfig } from "./config.js";
-import { runWorker } from "./runtime.js";
+import { runWorker } from "./platform/lifecycle/runtime.js";
 
 try {
   try {
@@ -20,16 +21,7 @@ try {
   });
   try {
     await runWorker(
-      () =>
-        createEmailWorker({
-          ...config,
-          deliver: smtp.deliver,
-          onEvent: (event) => {
-            if (event.event === "error" || event.event === "failed")
-              log.error(event, "Email processing failed");
-            else log.info(event, "Email processed");
-          },
-        }),
+      () => createWorker({ config, log, deliver: smtp.deliver }),
       smtp.close,
       log,
     );
