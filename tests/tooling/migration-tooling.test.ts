@@ -7,6 +7,46 @@ import { createRequire } from "node:module";
 import { expect, it } from "vitest";
 
 const exec = promisify(execFile);
+it("generates the application schema using shared compiled ESM contracts", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "kithwork-app-kit-"));
+  try {
+    const { fileURLToPath } = await import("node:url");
+    const config = join(directory, "drizzle.config.json");
+    await writeFile(
+      config,
+      JSON.stringify({
+        dialect: "postgresql",
+        schema: fileURLToPath(
+          new URL("../../packages/database/src/schema.ts", import.meta.url),
+        ).replaceAll("\\", "/"),
+        out: join(directory, "migrations"),
+      }),
+    );
+    const cli = fileURLToPath(
+      new URL("../../node_modules/drizzle-kit/bin.cjs", import.meta.url),
+    );
+    const generated = await exec(
+      process.execPath,
+      [cli, "generate", `--config=${config}`, "--name=application"],
+      { timeout: 30_000, cwd: directory },
+    ).catch((error: unknown) => {
+      if (error instanceof Error && "stdout" in error)
+        throw new Error(String(error.stdout), { cause: error });
+      throw error;
+    });
+    expect(generated.stderr).toBe("");
+    const sql = await readFile(
+      join(directory, "migrations/0000_application.sql"),
+      "utf8",
+    );
+    expect(sql).toContain('CREATE TABLE "organisation_member"');
+    expect(sql).toContain('CREATE TABLE "auth_user"');
+    expect(sql).toContain("'owner', 'admin', 'member'");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}, 30_000);
+
 it("generates and checks real PostgreSQL SQL using the pinned migration tool", async () => {
   const directory = await mkdtemp(join(tmpdir(), "kithwork-kit-"));
   try {

@@ -10,7 +10,7 @@
     "pnpm": "12.16.1"
   },
   "scripts": {
-    "db:generate": "pnpm --filter @kithwork/database db:generate",
+    "db:generate": "turbo run build --filter=@kithwork/database && pnpm --filter @kithwork/database db:generate",
     "db:check": "pnpm --filter @kithwork/database db:check",
     "db:migrate": "turbo run build --filter=@kithwork/database && pnpm --filter @kithwork/database db:migrate",
     "dev": "turbo run dev --filter=@kithwork/api... --filter=@kithwork/worker...",

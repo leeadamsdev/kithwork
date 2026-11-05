@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { fromNodeHeaders } from "better-auth/node";
-import type { createAuth } from "./auth.js";
-import type { ApiConfig } from "./config.js";
+import type { createAuth } from "./provider.js";
+import type { ApiConfig } from "../config.js";
 import { z } from "zod";
 
 // Leave room for the origin and signed token in the mail queue's 4096-character URL.

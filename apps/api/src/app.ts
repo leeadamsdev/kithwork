@@ -16,9 +16,11 @@ import { randomUUID } from "node:crypto";
 import type { ApiConfig } from "./config.js";
 import { registerHealth } from "./health.js";
 import { appRouter, type AppRouter } from "./trpc/router.js";
-import { createAuth } from "./auth.js";
-import { registerAuthRoutes } from "./auth-routes.js";
+import { createAuth } from "./auth/provider.js";
+import { registerAuthRoutes } from "./auth/routes.js";
 import { TRPCError } from "@trpc/server";
+import { registerRpcHttpBoundary } from "./trpc/http.js";
+import { databaseErrorCode } from "./database-error.js";
 
 export function createApi({
   config,
@@ -83,7 +85,7 @@ export function createApi({
   });
   app.addHook("onReady", async () => {
     const probe = {
-      text: "SELECT 1 FROM auth_user LIMIT 0",
+      text: "SELECT 1 FROM auth_user, organisation, organisation_member LIMIT 0",
       query_timeout: 1000,
     };
     await Promise.all([pool.query(probe), redis.ping()]);
@@ -181,44 +183,69 @@ export function createApi({
         producer.enqueue(message, requestId ? { requestId } : {}),
     });
     registerAuthRoutes(authenticatedApp, auth, config);
-    authenticatedApp.register(fastifyTRPCPlugin, {
-      prefix: "/trpc",
-      trpcOptions: {
-        router: appRouter,
-        maxBatchSize: 10,
-        responseMeta: () => ({ headers: { "cache-control": "no-store" } }),
-        createContext: async ({ req }) => {
-          const session = await auth.api
-            .getSession({
-              headers: fromNodeHeaders(req.headers),
-              query: { disableRefresh: true },
-            })
-            .catch(() => {
-              req.log.error("Authentication session lookup failed");
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Session unavailable",
+    authenticatedApp.register((rpcApp, _options, done) => {
+      registerRpcHttpBoundary(rpcApp, config);
+      rpcApp.register(fastifyTRPCPlugin, {
+        prefix: "/trpc",
+        trpcOptions: {
+          router: appRouter,
+          maxBatchSize: 10,
+          createContext: async ({ req }) => {
+            const session = await auth.api
+              .getSession({
+                headers: fromNodeHeaders(req.headers),
+                query: { disableRefresh: true },
+              })
+              .catch(() => {
+                req.log.error("Authentication session lookup failed");
+                throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Session unavailable",
+                });
               });
-            });
-          const user =
-            session?.user.emailVerified === true
-              ? {
-                  id: entityIdSchema.parse(session.user.id),
-                  name: session.user.name,
-                  email: session.user.email,
-                  emailVerified: true as const,
-                }
-              : null;
-          return { requestId: req.id, log: req.log, db, user };
-        },
-        onError: ({ error, ctx, path }) => {
-          if (error.code === "INTERNAL_SERVER_ERROR")
-            (ctx?.log ?? app.log).error(
-              { err: error.cause, procedure: path },
-              "RPC failed",
-            );
-        },
-      } satisfies FastifyTRPCPluginOptions<AppRouter>["trpcOptions"],
+            const user =
+              session?.user.emailVerified === true
+                ? {
+                    id: entityIdSchema.parse(session.user.id),
+                    name: session.user.name,
+                    email: session.user.email,
+                    emailVerified: true as const,
+                  }
+                : null;
+            return {
+              requestId: req.id,
+              log: req.log,
+              db,
+              user,
+              consumeOrganisationCreationLimit: async (actorId: string) => {
+                const limit = rpcApp.createRateLimit({
+                  max: config.organisationCreationRateLimitMax,
+                  timeWindow: 60000,
+                  keyGenerator: () => `organisation:create:${actorId}`,
+                });
+                const result = await limit(req);
+                if (!result.isAllowed && result.isExceeded)
+                  throw new TRPCError({
+                    code: "TOO_MANY_REQUESTS",
+                    message: "Organisation creation rate limit exceeded",
+                  });
+              },
+            };
+          },
+          onError: ({ error, ctx, path }) => {
+            if (error.code === "INTERNAL_SERVER_ERROR")
+              (ctx?.log ?? app.log).error(
+                {
+                  procedure: path,
+                  errorCode: error.code,
+                  databaseCode: databaseErrorCode(error.cause),
+                },
+                "RPC failed",
+              );
+          },
+        } satisfies FastifyTRPCPluginOptions<AppRouter>["trpcOptions"],
+      });
+      done();
     });
   });
   return app;

@@ -13,7 +13,8 @@ describe("compiled package", () => {
   it("can be bundled for a browser without Node.js dependencies", async () => {
     const result = await build({
       stdin: {
-        contents: 'export { entityIdSchema } from "@kithwork/contracts";',
+        contents:
+          'export { entityIdSchema, organisationRoleSchema, createOrganisationInputSchema, organisationPageSchema } from "@kithwork/contracts";',
         resolveDir: fileURLToPath(new URL("../", import.meta.url)),
       },
       bundle: true,

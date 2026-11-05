@@ -7,4 +7,5 @@ export interface ApiContext {
   log: FastifyBaseLogger;
   db: ReturnType<typeof createDatabase>["db"];
   user: AuthenticatedUser | null;
+  consumeOrganisationCreationLimit: (actorId: string) => Promise<void>;
 }
