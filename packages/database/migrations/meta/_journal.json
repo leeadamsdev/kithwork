@@ -15,6 +15,13 @@
       "when": 1793906653017,
       "tag": "0001_organisation_access",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793911616034,
+      "tag": "0002_invitation_outbox",
+      "breakpoints": true
     }
   ]
 }

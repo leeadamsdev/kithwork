@@ -6,7 +6,7 @@
   "license": "MIT",
   "exports": {
     "./router": {
-      "types": "./dist/trpc/router.d.ts"
+      "types": "./dist/platform/trpc/router.d.ts"
     }
   },
   "scripts": {

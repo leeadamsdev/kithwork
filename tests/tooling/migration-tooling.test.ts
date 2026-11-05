@@ -1,6 +1,6 @@
+import { createTemporaryDirectory } from "../temporary-directory.js";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { createRequire } from "node:module";
@@ -8,7 +8,7 @@ import { expect, it } from "vitest";
 
 const exec = promisify(execFile);
 it("generates the application schema using shared compiled ESM contracts", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "kithwork-app-kit-"));
+  const directory = await createTemporaryDirectory("kithwork-app-kit-");
   try {
     const { fileURLToPath } = await import("node:url");
     const config = join(directory, "drizzle.config.json");
@@ -48,7 +48,7 @@ it("generates the application schema using shared compiled ESM contracts", async
 }, 30_000);
 
 it("generates and checks real PostgreSQL SQL using the pinned migration tool", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "kithwork-kit-"));
+  const directory = await createTemporaryDirectory("kithwork-kit-");
   try {
     const schema = join(directory, "schema.ts");
     const output = join(directory, "migrations");

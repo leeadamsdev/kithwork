@@ -5,7 +5,9 @@ import { expect, it } from "vitest";
 it("keeps the typed client browser bundle free of server runtime dependencies", async () => {
   const bundle = await build({
     entryPoints: [
-      fileURLToPath(new URL("../fixtures/browser-client.ts", import.meta.url)),
+      fileURLToPath(
+        new URL("../fixtures/platform/trpc/browser-client.ts", import.meta.url),
+      ),
     ],
     bundle: true,
     platform: "browser",

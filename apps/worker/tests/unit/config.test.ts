@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { parseWorkerConfig } from "../../src/config.js";
 
 const env = {
+  DATABASE_URL: "postgresql://test:secret-marker@127.0.0.1:5432/test",
   REDIS_URL: "redis://:secret-marker@127.0.0.1:6379",
   MAIL_ENCRYPTION_KEY: randomBytes(32).toString("base64"),
 };
@@ -15,6 +16,8 @@ it("validates email worker configuration and keeps local defaults explicit", () 
     requireTLS: false,
   });
   expect(config.concurrency).toBe(2);
+  expect(config.databaseUrl).toBe(env.DATABASE_URL);
+  expect(config.databaseMaxConnections).toBe(5);
 });
 it("rejects insecure production mail and partial SMTP authentication without printing secrets", () => {
   for (const input of [

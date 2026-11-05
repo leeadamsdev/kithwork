@@ -357,12 +357,18 @@ importers:
 
   apps/worker:
     dependencies:
+      '@kithwork/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@kithwork/email':
         specifier: workspace:*
         version: link:../../packages/email
       '@kithwork/logging':
         specifier: workspace:*
         version: link:../../packages/logging
+      drizzle-orm:
+        specifier: 0.45.4
+        version: 0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.8)(pg@8.23.1)
       zod:
         specifier: 4.6.7
         version: 4.6.7

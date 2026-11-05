@@ -2,6 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
+    // Drizzle's declaration graph includes optional drivers for unused dialects.
+    "skipLibCheck": true,
     "types": ["node"],
     "lib": ["ES2024", "DOM"]
   },

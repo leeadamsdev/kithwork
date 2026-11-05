@@ -1,16 +1,15 @@
+import { createTemporaryDirectory } from "../../../tests/temporary-directory.js";
 import { exec } from "node:child_process";
 import { existsSync } from "node:fs";
 import {
   cp,
   mkdir,
-  mkdtemp,
   readFile,
   readdir,
   rename,
   rm,
   writeFile,
 } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -19,7 +18,7 @@ import { expect, it } from "vitest";
 const execute = promisify(exec);
 
 it("removes obsolete JavaScript, declarations and maps after a source rename", async () => {
-  const fixture = await mkdtemp(join(tmpdir(), "kithwork-build-"));
+  const fixture = await createTemporaryDirectory("kithwork-build-");
 
   try {
     const packageRoot = fileURLToPath(new URL("../", import.meta.url));
