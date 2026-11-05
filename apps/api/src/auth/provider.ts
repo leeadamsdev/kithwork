@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { authSchema, type createDatabase } from "@kithwork/database";
 import type { EmailMessage } from "@kithwork/email";
-import type { ApiConfig } from "./config.js";
+import type { ApiConfig } from "../config.js";
 import type { FastifyBaseLogger } from "fastify";
 
 const linkLifetimeSeconds = 3600;

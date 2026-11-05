@@ -16,7 +16,7 @@ it("applies the real authentication schema with unique identities and cascading 
     onPoolError: client.onPoolError,
   });
   const tables = await client.pool.query<{ table_name: string }>(
-    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name",
+    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND left(table_name, 5) = 'auth_' ORDER BY table_name",
   );
   expect(tables.rows.map((row) => row.table_name)).toEqual([
     "auth_account",

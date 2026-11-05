@@ -26,6 +26,8 @@ describe("API configuration", () => {
       { WEB_ORIGIN: "https://example.com?secret=private" },
       { NODE_ENV: "production" },
       { API_AUTH_RATE_LIMIT_MAX: "0" },
+      { API_ORGANISATION_CREATION_RATE_LIMIT_MAX: "0" },
+      { API_ORGANISATION_CREATION_RATE_LIMIT_MAX: "1001" },
     ]) {
       expect(() => parseConfig({ ...required, ...invalid })).toThrow(
         "Invalid API configuration",
@@ -48,6 +50,7 @@ describe("API configuration", () => {
       telemetry: { enabled: false },
       databaseMaxConnections: 10,
       rateLimitMax: 600,
+      organisationCreationRateLimitMax: 5,
     });
   });
   it("accepts ephemeral ports and explicit telemetry configuration", () => {

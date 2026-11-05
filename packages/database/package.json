@@ -32,6 +32,7 @@
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
+    "@kithwork/contracts": "workspace:*",
     "zod": "4.6.7",
     "drizzle-orm": "0.45.4",
     "pg": "8.23.1"

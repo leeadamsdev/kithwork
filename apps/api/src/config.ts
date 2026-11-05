@@ -38,6 +38,7 @@ const schema = z
     AUTH_BASE_URL: origin.default("http://127.0.0.1:3001"),
     WEB_ORIGIN: origin.default("http://127.0.0.1:5173"),
     API_AUTH_RATE_LIMIT_MAX: integer(1, 1000).default(10),
+    API_ORGANISATION_CREATION_RATE_LIMIT_MAX: integer(1, 1000).default(5),
     MAIL_ENCRYPTION_KEY: z
       .string()
       .regex(/^[A-Za-z0-9+/]{43}=$/)
@@ -96,6 +97,8 @@ export function parseConfig(env: Record<string, string | undefined>) {
     redisUrl: value.REDIS_URL,
     rateLimitMax: value.API_RATE_LIMIT_MAX,
     rateLimitNamespace: value.API_RATE_LIMIT_NAMESPACE,
+    organisationCreationRateLimitMax:
+      value.API_ORGANISATION_CREATION_RATE_LIMIT_MAX,
     auth: {
       secret: value.AUTH_SECRET,
       baseURL: value.AUTH_BASE_URL,
