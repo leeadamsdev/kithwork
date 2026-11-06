@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { createOutboxStore } from "../../../../apps/worker/src/features/outbox/store.js";
+import { listInvitations } from "../../../../apps/api/src/features/organisations/invitations/queries.js";
 import { outboxDatabase } from "./fixtures.js";
 
 it("limits each expiry sweep to a bounded batch and eventually clears a larger backlog", async () => {
@@ -58,6 +59,10 @@ it("bounds maintenance, scrubs expired payloads and prunes terminal retention", 
       "UPDATE email_outbox SET completed_at=now()-interval '8 days' WHERE id=$1",
       [event.id],
     );
+    await database.pool.query(
+      "UPDATE organisation_invitation SET version=2 WHERE id=$1",
+      [event.invitationId],
+    );
     await store.maintain();
     expect(
       (
@@ -79,6 +84,37 @@ it("bounds maintenance, scrubs expired payloads and prunes terminal retention", 
           [event.invitationId],
         )
       ).rowCount,
+    ).toBe(0);
+  } finally {
+    await database.close();
+  }
+});
+
+it("preserves the current email outcome while retaining its invitation", async () => {
+  const database = await outboxDatabase();
+  try {
+    for (const outcome of ["sent", "skipped", "failed"] as const) {
+      const event = await database.event();
+      await database.pool.query(
+        "UPDATE email_outbox SET payload=null,outcome=$2,completed_at=now()-interval '8 days' WHERE id=$1",
+        [event.id, outcome],
+      );
+    }
+    await createOutboxStore(database.db).maintain();
+    const page = await listInvitations(database.db, database.organisationId, {
+      limit: 10,
+    });
+    expect(page.items.map((item) => item.emailStatus).sort()).toEqual([
+      "failed",
+      "sent",
+      "skipped",
+    ]);
+    await database.pool.query(
+      "UPDATE organisation_invitation SET expires_at=now()-interval '31 days'",
+    );
+    await createOutboxStore(database.db).maintain();
+    expect(
+      (await database.pool.query("SELECT id FROM email_outbox")).rowCount,
     ).toBe(0);
   } finally {
     await database.close();

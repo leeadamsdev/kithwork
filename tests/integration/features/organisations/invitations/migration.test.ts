@@ -4,14 +4,14 @@ import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { expect, it } from "vitest";
 import { migrateDatabase } from "@kithwork/database/migrate";
-import { createTestDatabase } from "../../platform/database/fixtures.js";
-import { createTemporaryDirectory } from "../../../temporary-directory.js";
+import { createTestDatabase } from "../../../platform/database/fixtures.js";
+import { createTemporaryDirectory } from "../../../../temporary-directory.js";
 
 it("upgrades existing organisations, memberships and sessions without changing them", async () => {
   const database = await createTestDatabase();
   const previous = await createTemporaryDirectory("invitation-upgrade-");
   const source = fileURLToPath(
-    new URL("../../../../packages/database/migrations/", import.meta.url),
+    new URL("../../../../../packages/database/migrations/", import.meta.url),
   );
   const migrate = (migrationsFolder: string) =>
     migrateDatabase({

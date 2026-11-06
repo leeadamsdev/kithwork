@@ -10,3 +10,9 @@ export const forbidden = () =>
     code: "FORBIDDEN",
     message: "Insufficient organisation permissions",
   });
+
+export const invitationUnavailable = () =>
+  new TRPCError({
+    code: "NOT_FOUND",
+    message: "Invitation not found or unavailable",
+  });

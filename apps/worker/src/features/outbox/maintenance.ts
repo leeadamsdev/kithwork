@@ -10,7 +10,12 @@ export async function maintainOutbox(db: Database) {
       ) update email_outbox o set payload=null,outcome='skipped',last_error_code='obsolete',completed_at=clock_timestamp(),
         publish_lease_id=null,publish_lease_until=null,delivery_lease_id=null,delivery_lease_until=null from obsolete where o.id=obsolete.id`);
   await db.execute(
-    sql`delete from email_outbox where id in (select id from email_outbox where completed_at<clock_timestamp()-interval '7 days' order by completed_at,id limit 100 for update skip locked)`,
+    // The current version's scrubbed outcome is also the invitation's email status.
+    sql`delete from email_outbox where id in (
+      select o.id from email_outbox o where o.completed_at<clock_timestamp()-interval '7 days'
+        and not exists (select 1 from organisation_invitation i where i.id=o.invitation_id and i.version=o.invitation_version)
+      order by o.completed_at,o.id limit 100 for update of o skip locked
+    )`,
   );
   await db.execute(sql`delete from organisation_invitation where id in (
         select i.id from organisation_invitation i where ((i.status='pending' and i.expires_at<clock_timestamp()-interval '30 days')

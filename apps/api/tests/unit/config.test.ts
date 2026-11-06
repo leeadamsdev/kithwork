@@ -28,6 +28,9 @@ describe("API configuration", () => {
       { API_AUTH_RATE_LIMIT_MAX: "0" },
       { API_ORGANISATION_CREATION_RATE_LIMIT_MAX: "0" },
       { API_ORGANISATION_CREATION_RATE_LIMIT_MAX: "1001" },
+      { API_INVITATION_SEND_RATE_LIMIT_MAX: "0" },
+      { API_INVITATION_SEND_RATE_LIMIT_MAX: "1001" },
+      { API_INVITATION_ACCESS_RATE_LIMIT_MAX: "0" },
     ]) {
       expect(() => parseConfig({ ...required, ...invalid })).toThrow(
         "Invalid API configuration",
@@ -51,6 +54,8 @@ describe("API configuration", () => {
       databaseMaxConnections: 10,
       rateLimitMax: 600,
       organisationCreationRateLimitMax: 5,
+      invitationSendRateLimitMax: 10,
+      invitationAccessRateLimitMax: 30,
     });
   });
   it("accepts ephemeral ports and explicit telemetry configuration", () => {

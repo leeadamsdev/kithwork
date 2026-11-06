@@ -7,6 +7,7 @@ import { canChangeMemberRole, canRemoveMember } from "./policies.js";
 import { withLockedOrganisation } from "./transaction.js";
 import { missing, forbidden } from "./errors.js";
 import { memberSummary, type MemberRow } from "./presentation.js";
+import { cancelIssuedInvitations } from "./invitations/cancellation.js";
 const { organisationMember } = organisationsSchema;
 const { user } = authSchema;
 
@@ -82,6 +83,7 @@ export async function changeMemberRole(
             eq(organisationMember.userId, userId),
           ),
         );
+      await cancelIssuedInvitations(tx, organisationId, userId, role);
       return memberSummary({ ...target, role });
     },
   );
@@ -115,6 +117,7 @@ export async function removeMember(
             eq(organisationMember.userId, userId),
           ),
         );
+      await cancelIssuedInvitations(tx, organisationId, userId, null);
       return { success: true as const };
     },
   );

@@ -1,4 +1,4 @@
-import { invitationStatuses } from "@kithwork/contracts";
+import { invitationStatuses, type InvitationRole } from "@kithwork/contracts";
 import { sql } from "drizzle-orm";
 import {
   check,
@@ -23,7 +23,7 @@ export const organisationInvitation = pgTable(
       .notNull()
       .references(() => organisation.id, { onDelete: "cascade" }),
     email: text("email").notNull(),
-    role: organisationRole("role").notNull(),
+    role: organisationRole("role").$type<InvitationRole>().notNull(),
     issuerId: uuid("issuer_id")
       .notNull()
       .references(() => user.id, { onDelete: "restrict" }),

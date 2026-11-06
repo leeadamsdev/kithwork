@@ -33,23 +33,51 @@ export async function createApiContext(
           emailVerified: true as const,
         }
       : null;
+  const consume = async (key: string, max: number, message: string) => {
+    const limit = rpcApp.createRateLimit({
+      max,
+      timeWindow: 60000,
+      keyGenerator: () => key,
+    });
+    const result = await limit(req);
+    if (!result.isAllowed && result.isExceeded)
+      throw new TRPCError({ code: "TOO_MANY_REQUESTS", message });
+  };
   return {
     requestId: req.id,
     log: req.log,
     db,
     user,
-    consumeOrganisationCreationLimit: async (actorId: string) => {
-      const limit = rpcApp.createRateLimit({
-        max: config.organisationCreationRateLimitMax,
-        timeWindow: 60000,
-        keyGenerator: () => `organisation:create:${actorId}`,
-      });
-      const result = await limit(req);
-      if (!result.isAllowed && result.isExceeded)
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: "Organisation creation rate limit exceeded",
-        });
+    invitationEmail: {
+      encryptionKey: config.auth.encryptionKey,
+      webOrigin: config.auth.webOrigin,
     },
+    consumeOrganisationCreationLimit: (actorId: string) =>
+      consume(
+        `organisation:create:${actorId}`,
+        config.organisationCreationRateLimitMax,
+        "Organisation creation rate limit exceeded",
+      ),
+    consumeInvitationSendLimit: async (
+      actorId: string,
+      organisationId: string,
+    ) => {
+      await consume(
+        `invitation:send:actor:${actorId}`,
+        config.invitationSendRateLimitMax,
+        "Invitation sending rate limit exceeded",
+      );
+      await consume(
+        `invitation:send:organisation:${organisationId}`,
+        config.invitationSendRateLimitMax,
+        "Invitation sending rate limit exceeded",
+      );
+    },
+    consumeInvitationAccessLimit: (actorId: string) =>
+      consume(
+        `invitation:access:${actorId}`,
+        config.invitationAccessRateLimitMax,
+        "Invitation access rate limit exceeded",
+      ),
   };
 }
