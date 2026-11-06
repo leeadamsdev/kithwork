@@ -26,4 +26,9 @@ export interface ApiContext {
     actorId: string,
     organisationId: string,
   ) => Promise<void>;
+  consumeCommentCreationLimit: (
+    actorId: string,
+    organisationId: string,
+  ) => Promise<void>;
+  consumeCommentEditLimit: (actorId: string) => Promise<void>;
 }

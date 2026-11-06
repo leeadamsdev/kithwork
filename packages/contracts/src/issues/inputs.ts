@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { entityIdSchema } from "../identifiers.js";
+import { textInputSchema } from "../primitives/text-input.js";
 import { calendarDateSchema } from "../primitives/calendar-date.js";
 import { organisationInputSchema } from "../organisations/schema.js";
 import { workflowCategorySchema } from "../workflows/schema.js";
@@ -7,9 +8,8 @@ import { teamInputSchema } from "../teams/inputs.js";
 import { organisationPageInputSchema } from "../organisations/schema.js";
 import { encodedIssueCursorSchema, issuePrioritySchema } from "./schema.js";
 
-const title = z.string().trim().min(1).max(200);
-const description = z
-  .string()
+const title = textInputSchema.trim().min(1).max(200);
+const description = textInputSchema
   .max(20000)
   .transform((value) => (value.trim() ? value : null))
   .nullable();

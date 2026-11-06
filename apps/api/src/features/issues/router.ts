@@ -22,8 +22,10 @@ import { getIssue, getIssueByIdentifier, listIssues } from "./queries.js";
 import { listIssueActivity } from "./activity-queries.js";
 import { setIssueArchived } from "./lifecycle.js";
 import { listIssueAssignees } from "./assignees.js";
+import { commentsRouter } from "./comments/router.js";
 
 export const issuesRouter = router({
+  comments: commentsRouter,
   assignees: router({
     list: organisationProcedure
       .input(issueAssigneePageInputSchema)

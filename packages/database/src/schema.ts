@@ -7,3 +7,5 @@ export * from "./schema/projects.js";
 export * from "./schema/workflows.js";
 export * from "./schema/issues.js";
 export * from "./schema/issue-activity.js";
+export * from "./schema/comments.js";
+export * from "./schema/comment-events.js";
