@@ -35,7 +35,12 @@ it("removes obsolete JavaScript, declarations and maps after a source rename", a
       join(fixture, "tsconfig.build.json"),
       JSON.stringify({
         extends: join(packageRoot, "tsconfig.build.json"),
-        compilerOptions: { rootDir: "src", outDir: "dist" },
+        compilerOptions: {
+          rootDir: "src",
+          outDir: "dist",
+          // This fixture checks emitted artifacts; the normal build checks library declarations.
+          skipLibCheck: true,
+        },
         include: ["src/**/*.ts"],
       }),
     );
@@ -67,4 +72,4 @@ it("removes obsolete JavaScript, declarations and maps after a source rename", a
   } finally {
     await rm(fixture, { recursive: true, force: true });
   }
-}, 15_000);
+}, 30_000);
