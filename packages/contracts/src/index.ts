@@ -8,3 +8,5 @@ export * from "./organisations/schema.js";
 export * from "./organisations/invitations.js";
 export * from "./teams/schema.js";
 export * from "./teams/inputs.js";
+export * from "./projects/schema.js";
+export * from "./projects/inputs.js";

@@ -39,6 +39,7 @@ export function useOrganisationFixture() {
       API_INVITATION_SEND_RATE_LIMIT_MAX: "100",
       API_INVITATION_ACCESS_RATE_LIMIT_MAX: "100",
       API_TEAM_CREATION_RATE_LIMIT_MAX: "100",
+      API_PROJECT_CREATION_RATE_LIMIT_MAX: "100",
       ...overrides,
     });
   beforeAll(async () => {

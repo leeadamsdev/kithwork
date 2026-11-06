@@ -4,7 +4,7 @@ import { expect, it } from "vitest";
 import { createApi } from "../../../../src/app.js";
 import { useTeamFixture } from "./fixtures.js";
 const { f, mutate } = useTeamFixture();
-it("shares actor and organisation creation budgets across instances without letting ordinary members consume them", async () => {
+it("shares creation budgets across instances and UUID casing without letting ordinary members consume them", async () => {
   const org = await f.create();
   await f.member(org, f.bob, "admin");
   await f.member(org, f.carol);
@@ -24,9 +24,10 @@ it("shares actor and organisation creation budgets across instances without lett
     expect((await mutate("create", input(), f.alice, first)).statusCode).toBe(
       200,
     );
-    expect((await mutate("create", input(), f.bob, second)).statusCode).toBe(
-      429,
-    );
+    expect(
+      (await mutate("create", input(org.id.toUpperCase()), f.bob, second))
+        .statusCode,
+    ).toBe(429);
     const other = await f.create(f.bob);
     expect(
       (await mutate("create", input(other.id), f.bob, first)).statusCode,

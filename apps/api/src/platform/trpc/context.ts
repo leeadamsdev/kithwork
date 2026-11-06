@@ -18,4 +18,8 @@ export interface ApiContext {
     actorId: string,
     organisationId: string,
   ) => Promise<void>;
+  consumeProjectCreationLimit: (
+    actorId: string,
+    organisationId: string,
+  ) => Promise<void>;
 }

@@ -67,7 +67,8 @@ export async function startWorker(smtp?: { host: string; port: number }) {
     await exited;
     await producer.close();
     try {
-      await queue.obliterate();
+      // This unique test queue has no running worker after exited resolves; Windows termination can leave active jobs.
+      await queue.obliterate({ force: true });
     } finally {
       await queue.close();
       await database.close();
