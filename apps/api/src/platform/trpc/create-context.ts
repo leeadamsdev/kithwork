@@ -109,5 +109,20 @@ export async function createApiContext(
         "Project creation rate limit exceeded",
       );
     },
+    consumeIssueCreationLimit: async (
+      actorId: string,
+      organisationId: string,
+    ) => {
+      await consume(
+        `issue:create:actor:${actorId.toLowerCase()}`,
+        config.issueCreationActorRateLimitMax,
+        "Issue creation rate limit exceeded",
+      );
+      await consume(
+        `issue:create:organisation:${organisationId.toLowerCase()}`,
+        config.issueCreationOrganisationRateLimitMax,
+        "Issue creation rate limit exceeded",
+      );
+    },
   };
 }

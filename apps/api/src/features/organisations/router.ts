@@ -19,6 +19,7 @@ import { removeMember } from "./members.js";
 import { invitationsRouter } from "./invitations/router.js";
 import { teamsRouter } from "../teams/router.js";
 import { projectsRouter } from "../projects/router.js";
+import { issuesRouter } from "../issues/router.js";
 
 const successSchema = z.strictObject({ success: z.literal(true) });
 
@@ -67,6 +68,7 @@ export const organisationsRouter = router({
   invitations: invitationsRouter,
   teams: teamsRouter,
   projects: projectsRouter,
+  issues: issuesRouter,
   leave: organisationProcedure
     .input(organisationInputSchema)
     .output(successSchema)

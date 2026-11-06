@@ -26,18 +26,42 @@ export async function withOrganisationLock<T>(
   organisationId: string,
   action: (tx: Transaction) => Promise<T>,
 ) {
+  return withOrganisationBarrier(db, organisationId, "update", action);
+}
+
+export function withSharedOrganisationAccess<T>(
+  db: Database,
+  actorId: string,
+  organisationId: string,
+  action: (
+    tx: Transaction,
+    access: Awaited<ReturnType<typeof loadOrganisationAccess>>,
+  ) => Promise<T>,
+) {
+  return withOrganisationBarrier(db, organisationId, "share", async (tx) => {
+    const access = await loadOrganisationAccess(tx, actorId, organisationId);
+    return action(tx, access);
+  });
+}
+
+function withOrganisationBarrier<T>(
+  db: Database,
+  organisationId: string,
+  mode: "share" | "update",
+  action: (tx: Transaction) => Promise<T>,
+) {
   return db
     .transaction(
       async (tx) => {
         await tx.execute(sql`set local lock_timeout = '2s'`);
         await tx.execute(sql`set local statement_timeout = '5s'`);
-        // Serialize organisation administration, then re-read permissions after waiting.
-        // Every membership writer must take this lock before changing membership rows.
+        // Shared issue writers coexist; exclusive administration blocks membership/privacy changes.
+        // Both callers re-read permissions after acquiring the barrier.
         const [row] = await tx
           .select({ id: organisation.id })
           .from(organisation)
           .where(eq(organisation.id, organisationId))
-          .for("update");
+          .for(mode);
         if (!row) throw missing();
         return action(tx);
       },

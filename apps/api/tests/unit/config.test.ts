@@ -58,6 +58,29 @@ describe("API configuration", () => {
       invitationAccessRateLimitMax: 30,
       teamCreationRateLimitMax: 10,
       projectCreationRateLimitMax: 20,
+      issueCreationActorRateLimitMax: 60,
+      issueCreationOrganisationRateLimitMax: 300,
+    });
+  });
+  it("bounds independently configurable issue creation budgets", () => {
+    for (const field of [
+      "API_ISSUE_CREATION_ACTOR_RATE_LIMIT_MAX",
+      "API_ISSUE_CREATION_ORGANISATION_RATE_LIMIT_MAX",
+    ]) {
+      for (const value of ["0", "-1", "100001", "not-a-number"])
+        expect(() => parseConfig({ ...required, [field]: value })).toThrow(
+          "Invalid API configuration",
+        );
+    }
+    expect(
+      parseConfig({
+        ...required,
+        API_ISSUE_CREATION_ACTOR_RATE_LIMIT_MAX: "25",
+        API_ISSUE_CREATION_ORGANISATION_RATE_LIMIT_MAX: "125",
+      }),
+    ).toMatchObject({
+      issueCreationActorRateLimitMax: 25,
+      issueCreationOrganisationRateLimitMax: 125,
     });
   });
   it("accepts ephemeral ports and explicit telemetry configuration", () => {

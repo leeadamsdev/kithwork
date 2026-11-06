@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { entityIdSchema } from "../identifiers.js";
 import { teamVisibilitySchema } from "../teams/schema.js";
+import { calendarDateSchema } from "../primitives/calendar-date.js";
 
 export const projectStatuses = [
   "planned",
@@ -11,12 +12,7 @@ export const projectStatuses = [
 ] as const;
 export const projectStatusSchema = z.enum(projectStatuses);
 export type ProjectStatus = z.infer<typeof projectStatusSchema>;
-export const projectDateSchema = z.iso
-  .date()
-  .refine(
-    (value) => !value.startsWith("0000-"),
-    "Planning dates require a year from 0001 to 9999",
-  );
+export const projectDateSchema = calendarDateSchema;
 export const projectSchema = z.strictObject({
   id: entityIdSchema,
   organisationId: entityIdSchema,

@@ -7,3 +7,5 @@ export * as outboxSchema from "./schema/outbox.js";
 export * as teamsSchema from "./schema/teams.js";
 export * as projectsSchema from "./schema/projects.js";
 export * as workflowsSchema from "./schema/workflows.js";
+export * as issuesSchema from "./schema/issues.js";
+export * as issueActivitySchema from "./schema/issue-activity.js";

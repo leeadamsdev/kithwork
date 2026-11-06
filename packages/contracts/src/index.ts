@@ -12,3 +12,7 @@ export * from "./projects/schema.js";
 export * from "./projects/inputs.js";
 export * from "./workflows/schema.js";
 export * from "./workflows/inputs.js";
+export { calendarDateSchema } from "./primitives/calendar-date.js";
+export * from "./issues/schema.js";
+export * from "./issues/inputs.js";
+export * from "./issues/activity.js";

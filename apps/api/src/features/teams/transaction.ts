@@ -30,7 +30,7 @@ export function withLockedTeam<T>(
     },
   );
 }
-export function requireActiveTeam(row: TeamRow) {
+export function requireActiveTeam(row: Pick<TeamRow, "archivedAt">) {
   if (row.archivedAt)
     throw teamConflict("Restore this team before changing it");
 }
