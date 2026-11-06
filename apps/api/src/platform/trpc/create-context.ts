@@ -68,7 +68,7 @@ export async function createApiContext(
         "Invitation sending rate limit exceeded",
       );
       await consume(
-        `invitation:send:organisation:${organisationId}`,
+        `invitation:send:organisation:${organisationId.toLowerCase()}`,
         config.invitationSendRateLimitMax,
         "Invitation sending rate limit exceeded",
       );
@@ -89,9 +89,24 @@ export async function createApiContext(
         "Team creation rate limit exceeded",
       );
       await consume(
-        `team:create:organisation:${organisationId}`,
+        `team:create:organisation:${organisationId.toLowerCase()}`,
         config.teamCreationRateLimitMax,
         "Team creation rate limit exceeded",
+      );
+    },
+    consumeProjectCreationLimit: async (
+      actorId: string,
+      organisationId: string,
+    ) => {
+      await consume(
+        `project:create:actor:${actorId}`,
+        config.projectCreationRateLimitMax,
+        "Project creation rate limit exceeded",
+      );
+      await consume(
+        `project:create:organisation:${organisationId.toLowerCase()}`,
+        config.projectCreationRateLimitMax,
+        "Project creation rate limit exceeded",
       );
     },
   };

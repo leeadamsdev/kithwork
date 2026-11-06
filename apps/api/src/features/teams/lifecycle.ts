@@ -3,6 +3,7 @@ import type { Database } from "../../platform/database/types.js";
 import { isOrganisationAdministrator } from "./policies.js";
 import { teamForbidden } from "./errors.js";
 import { presentTeam } from "./presentation.js";
+import { requireSafeTeamArchive } from "./archive-guard.js";
 import {
   requireActiveTeam,
   requireTeamVersion,
@@ -48,6 +49,8 @@ export function setTeamArchived(
         access.membershipRole,
       );
     requireTeamVersion(access.team, input.expectedVersion);
+    if (archived)
+      await requireSafeTeamArchive(tx, input.organisationId, input.teamId);
     const row = await saveTeam(tx, access.team, {
       archivedAt: archived ? new Date() : null,
     });

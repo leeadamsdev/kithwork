@@ -66,7 +66,7 @@ describe("invitation request budgets", () => {
     }
   });
 
-  it("shares the organisation budget between administrators without letting members consume it", async () => {
+  it("shares the organisation budget across administrators and UUID casing without letting members consume it", async () => {
     const org = await f.create();
     await f.member(org, f.bob, "admin");
     await f.member(org, f.carol);
@@ -105,7 +105,7 @@ describe("invitation request budgets", () => {
         (
           await f.mutate(
             "organisations.invitations.create",
-            input(),
+            { ...input(), organisationId: org.id.toUpperCase() },
             f.bob,
             instance,
           )
