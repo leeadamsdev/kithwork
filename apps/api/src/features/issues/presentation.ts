@@ -21,6 +21,15 @@ export function presentIssueSummary(row: IssueAccess) {
     dueDate: value.dueDate,
     creatorId: value.creatorId,
     creator: row.creator,
+    assigneeId: value.assigneeId,
+    assignee: row.assignee,
+    projectId: value.projectId,
+    project: row.project
+      ? {
+          ...row.project,
+          archivedAt: row.project.archivedAt?.toISOString() ?? null,
+        }
+      : null,
     version: value.version,
     createdAt: value.createdAt.toISOString(),
     updatedAt: value.updatedAt.toISOString(),

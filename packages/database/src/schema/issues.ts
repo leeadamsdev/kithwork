@@ -17,6 +17,8 @@ import {
 import { user } from "./auth.js";
 import { team } from "./teams.js";
 import { workflowStatus } from "./workflows.js";
+import { organisationMember } from "./organisations.js";
+import { projectTeam } from "./projects.js";
 
 export const issuePriority = pgEnum("issue_priority", issuePriorities);
 export const issueCounter = pgTable(
@@ -52,6 +54,8 @@ export const issue = pgTable(
     creatorId: uuid("creator_id").references(() => user.id, {
       onDelete: "set null",
     }),
+    assigneeId: uuid("assignee_id"),
+    projectId: uuid("project_id"),
     createdAt: timestamp("created_at", { withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -82,6 +86,23 @@ export const issue = pgTable(
         workflowStatus.id,
       ],
     }),
+    foreignKey({
+      name: "issue_assignee_member_fk",
+      columns: [table.organisationId, table.assigneeId],
+      foreignColumns: [
+        organisationMember.organisationId,
+        organisationMember.userId,
+      ],
+    }),
+    foreignKey({
+      name: "issue_project_team_fk",
+      columns: [table.organisationId, table.projectId, table.teamId],
+      foreignColumns: [
+        projectTeam.organisationId,
+        projectTeam.projectId,
+        projectTeam.teamId,
+      ],
+    }),
     check(
       "issue_title_length",
       sql`char_length(btrim(${table.title})) between 1 and 200`,
@@ -107,5 +128,21 @@ export const issue = pgTable(
       table.createdAt.desc(),
       table.id.desc(),
     ),
+    index("issue_assignee_created_idx")
+      .on(
+        table.organisationId,
+        table.assigneeId,
+        table.createdAt.desc(),
+        table.id.desc(),
+      )
+      .where(sql`${table.assigneeId} is not null`),
+    index("issue_project_created_idx")
+      .on(
+        table.organisationId,
+        table.projectId,
+        table.createdAt.desc(),
+        table.id.desc(),
+      )
+      .where(sql`${table.projectId} is not null`),
   ],
 );

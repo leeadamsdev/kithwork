@@ -2,6 +2,7 @@ import { z } from "zod";
 import { entityIdSchema } from "../identifiers.js";
 import { calendarDateSchema } from "../primitives/calendar-date.js";
 import { workflowCategorySchema } from "../workflows/schema.js";
+import { projectStatusSchema } from "../projects/schema.js";
 
 export const issuePriorities = [
   "none",
@@ -12,6 +13,16 @@ export const issuePriorities = [
 ] as const;
 export const issuePrioritySchema = z.enum(issuePriorities);
 export type IssuePriority = z.infer<typeof issuePrioritySchema>;
+export const issueUserSchema = z.strictObject({
+  id: entityIdSchema,
+  name: z.string(),
+});
+export const issueProjectSchema = z.strictObject({
+  id: entityIdSchema,
+  name: z.string(),
+  status: projectStatusSchema,
+  archivedAt: z.iso.datetime().nullable(),
+});
 export const issueStatusSchema = z.strictObject({
   id: entityIdSchema,
   name: z.string(),
@@ -31,7 +42,11 @@ export const issueSummarySchema = z.strictObject({
   dueDate: calendarDateSchema.nullable(),
   version: z.number().int().positive().max(2147483647),
   creatorId: entityIdSchema.nullable(),
-  creator: z.strictObject({ id: entityIdSchema, name: z.string() }).nullable(),
+  creator: issueUserSchema.nullable(),
+  assigneeId: entityIdSchema.nullable(),
+  assignee: issueUserSchema.nullable(),
+  projectId: entityIdSchema.nullable(),
+  project: issueProjectSchema.nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   archivedAt: z.iso.datetime().nullable(),
@@ -49,6 +64,10 @@ export type IssueDetail = z.infer<typeof issueDetailSchema>;
 export const issuePageSchema = z.strictObject({
   items: z.array(issueSummarySchema),
   nextCursor: z.string().nullable(),
+});
+export const issueAssigneePageSchema = z.strictObject({
+  items: z.array(issueUserSchema),
+  nextCursor: entityIdSchema.nullable(),
 });
 
 export const issueCursorSchema = z.strictObject({

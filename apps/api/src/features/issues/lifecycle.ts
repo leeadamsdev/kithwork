@@ -36,11 +36,9 @@ export function setIssueArchived(
     await appendIssueActivity(
       tx,
       actor,
-      row,
-      updated,
+      access,
+      { ...access, issue: updated, status },
       archived ? "archived" : "restored",
-      access.status,
-      status,
     );
     return getIssue(tx, actor.id, input);
   });

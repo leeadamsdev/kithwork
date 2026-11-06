@@ -35,7 +35,7 @@ it("validates issue fields while preserving Markdown and shared calendar-date se
     { dueDate: "2026-11-06T00:00:00Z" },
     { priority: "medium" },
     { number: 1 },
-    { assigneeId: randomUUID() },
+    { creatorId: randomUUID() },
   ])
     expect(
       contracts.createIssueInputSchema.safeParse({

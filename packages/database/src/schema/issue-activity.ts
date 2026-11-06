@@ -52,7 +52,10 @@ export const issueActivity = pgTable(
       table.issueVersion,
     ),
     check("issue_activity_version_positive", sql`${table.issueVersion} > 0`),
-    check("issue_activity_cause", sql`${table.cause} = 'user'`),
+    check(
+      "issue_activity_cause",
+      sql`${table.cause} in ('user','organisation_member_removed','organisation_member_left','team_member_removed','team_member_left','team_visibility_changed','organisation_role_changed')`,
+    ),
     check(
       "issue_activity_changes_object",
       sql`jsonb_typeof(${table.changes}) = 'object'`,

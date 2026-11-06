@@ -10,6 +10,8 @@ import {
   issueDetailSchema,
   issuePageSchema,
   issueActivityPageSchema,
+  issueAssigneePageSchema,
+  issueAssigneePageInputSchema,
 } from "@kithwork/contracts";
 import { router } from "../../platform/trpc/procedures.js";
 import { organisationProcedure } from "../organisations/procedure.js";
@@ -19,8 +21,17 @@ import { createIssue, updateIssue } from "./commands.js";
 import { getIssue, getIssueByIdentifier, listIssues } from "./queries.js";
 import { listIssueActivity } from "./activity-queries.js";
 import { setIssueArchived } from "./lifecycle.js";
+import { listIssueAssignees } from "./assignees.js";
 
 export const issuesRouter = router({
+  assignees: router({
+    list: organisationProcedure
+      .input(issueAssigneePageInputSchema)
+      .output(issueAssigneePageSchema)
+      .query(({ ctx, input }) =>
+        listIssueAssignees(ctx.db, ctx.user.id, input),
+      ),
+  }),
   create: organisationProcedure
     .input(createIssueInputSchema)
     .output(issueDetailSchema)
