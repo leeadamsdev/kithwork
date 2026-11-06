@@ -5,6 +5,7 @@ import { team, teamMember } from "./access.js";
 import { canManageTeam, isOrganisationAdministrator } from "./policies.js";
 import { teamConflict, teamForbidden } from "./errors.js";
 import { presentTeam } from "./presentation.js";
+import { initialiseTeamWorkflow } from "../workflows/bootstrap.js";
 import {
   requireActiveTeam,
   requireTeamVersion,
@@ -36,6 +37,7 @@ export function createTeam(
         userId: actorId,
         role: "maintainer",
       });
+      await initialiseTeamWorkflow(tx, row.organisationId, row.id);
       return presentTeam(row, organisation.role, "maintainer");
     },
   );

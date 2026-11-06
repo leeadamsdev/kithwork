@@ -19,8 +19,10 @@ import { isOrganisationAdministrator } from "./policies.js";
 import { teamForbidden } from "./errors.js";
 import { teamMembersRouter } from "./members-router.js";
 import { joinTeam, leaveTeam } from "./members.js";
+import { workflowRouter } from "../workflows/router.js";
 
 export const teamsRouter = router({
+  workflow: workflowRouter,
   members: teamMembersRouter,
   join: organisationProcedure
     .input(teamInputSchema)
