@@ -93,6 +93,10 @@ it("bounds maintenance, scrubs expired payloads and prunes terminal retention", 
 it("preserves the current email outcome while retaining its invitation", async () => {
   const database = await outboxDatabase();
   try {
+    await database.pool.query(
+      "INSERT INTO organisation_member(organisation_id,user_id,role) VALUES($1,$2,'owner')",
+      [database.organisationId, database.userId],
+    );
     for (const outcome of ["sent", "skipped", "failed"] as const) {
       const event = await database.event();
       await database.pool.query(
@@ -101,9 +105,14 @@ it("preserves the current email outcome while retaining its invitation", async (
       );
     }
     await createOutboxStore(database.db).maintain();
-    const page = await listInvitations(database.db, database.organisationId, {
-      limit: 10,
-    });
+    const page = await listInvitations(
+      database.db,
+      database.userId,
+      database.organisationId,
+      {
+        limit: 10,
+      },
+    );
     expect(page.items.map((item) => item.emailStatus).sort()).toEqual([
       "failed",
       "sent",

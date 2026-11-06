@@ -1,9 +1,11 @@
 import { authSchema, organisationsSchema } from "@kithwork/database";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, exists, gt } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { Database } from "../../platform/database/types.js";
 import { summary, memberSummary } from "./presentation.js";
 const { organisation, organisationMember } = organisationsSchema;
 const { user } = authSchema;
+const actorMembership = alias(organisationMember, "actor_membership");
 
 type PageInput = { cursor?: string | undefined; limit: number };
 
@@ -45,6 +47,7 @@ export async function listOrganisations(
 
 export async function listMembers(
   db: Database,
+  actorId: string,
   organisationId: string,
   input: PageInput,
 ) {
@@ -60,6 +63,17 @@ export async function listMembers(
     .where(
       and(
         eq(organisationMember.organisationId, organisationId),
+        exists(
+          db
+            .select({ userId: actorMembership.userId })
+            .from(actorMembership)
+            .where(
+              and(
+                eq(actorMembership.organisationId, organisationId),
+                eq(actorMembership.userId, actorId),
+              ),
+            ),
+        ),
         input.cursor ? gt(organisationMember.userId, input.cursor) : undefined,
       ),
     )

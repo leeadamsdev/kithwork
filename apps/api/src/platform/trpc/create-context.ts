@@ -79,5 +79,20 @@ export async function createApiContext(
         config.invitationAccessRateLimitMax,
         "Invitation access rate limit exceeded",
       ),
+    consumeTeamCreationLimit: async (
+      actorId: string,
+      organisationId: string,
+    ) => {
+      await consume(
+        `team:create:actor:${actorId}`,
+        config.teamCreationRateLimitMax,
+        "Team creation rate limit exceeded",
+      );
+      await consume(
+        `team:create:organisation:${organisationId}`,
+        config.teamCreationRateLimitMax,
+        "Team creation rate limit exceeded",
+      );
+    },
   };
 }

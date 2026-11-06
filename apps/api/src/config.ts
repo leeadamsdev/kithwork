@@ -41,6 +41,7 @@ const schema = z
     API_ORGANISATION_CREATION_RATE_LIMIT_MAX: integer(1, 1000).default(5),
     API_INVITATION_SEND_RATE_LIMIT_MAX: integer(1, 1000).default(10),
     API_INVITATION_ACCESS_RATE_LIMIT_MAX: integer(1, 1000).default(30),
+    API_TEAM_CREATION_RATE_LIMIT_MAX: integer(1, 1000).default(10),
     MAIL_ENCRYPTION_KEY: z
       .string()
       .regex(/^[A-Za-z0-9+/]{43}=$/)
@@ -103,6 +104,7 @@ export function parseConfig(env: Record<string, string | undefined>) {
       value.API_ORGANISATION_CREATION_RATE_LIMIT_MAX,
     invitationSendRateLimitMax: value.API_INVITATION_SEND_RATE_LIMIT_MAX,
     invitationAccessRateLimitMax: value.API_INVITATION_ACCESS_RATE_LIMIT_MAX,
+    teamCreationRateLimitMax: value.API_TEAM_CREATION_RATE_LIMIT_MAX,
     auth: {
       secret: value.AUTH_SECRET,
       baseURL: value.AUTH_BASE_URL,
