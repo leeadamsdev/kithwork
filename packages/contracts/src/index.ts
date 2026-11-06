@@ -10,3 +10,5 @@ export * from "./teams/schema.js";
 export * from "./teams/inputs.js";
 export * from "./projects/schema.js";
 export * from "./projects/inputs.js";
+export * from "./workflows/schema.js";
+export * from "./workflows/inputs.js";

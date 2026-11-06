@@ -6,3 +6,4 @@ export * as invitationsSchema from "./schema/invitations.js";
 export * as outboxSchema from "./schema/outbox.js";
 export * as teamsSchema from "./schema/teams.js";
 export * as projectsSchema from "./schema/projects.js";
+export * as workflowsSchema from "./schema/workflows.js";
