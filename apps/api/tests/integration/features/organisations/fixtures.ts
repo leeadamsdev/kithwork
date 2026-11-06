@@ -8,7 +8,7 @@ import { apiTestEnvironment } from "../../../fixtures/config.js";
 import { createTestDatabase } from "../../../../../../tests/integration/platform/database/fixtures.js";
 import { uniqueNamespace } from "../../../../../../tests/integration/support/namespace.js";
 import { integrationServices } from "../../../../../../tests/integration/context.js";
-export type Actor = { id: string; cookie: string };
+export type Actor = { id: string; cookie: string; email: string };
 export type Org = { id: string; name: string; role: string };
 export type Member = {
   userId: string;
@@ -36,6 +36,8 @@ export function useOrganisationFixture() {
       API_RATE_LIMIT_NAMESPACE: uniqueNamespace(),
       API_AUTH_RATE_LIMIT_MAX: "100",
       API_ORGANISATION_CREATION_RATE_LIMIT_MAX: "100",
+      API_INVITATION_SEND_RATE_LIMIT_MAX: "100",
+      API_INVITATION_ACCESS_RATE_LIMIT_MAX: "100",
       ...overrides,
     });
   beforeAll(async () => {
@@ -109,7 +111,7 @@ export function useOrganisationFixture() {
     const cookie = (Array.isArray(raw) ? raw : [raw!])
       .map((value) => value.split(";", 1)[0])
       .join("; ");
-    return { id, cookie };
+    return { id, cookie, email };
   }
   async function create(actor = alice, name = "Engineering", instance = app) {
     const response = await mutate(

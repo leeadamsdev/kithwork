@@ -15,6 +15,17 @@ export async function withLockedOrganisation<T>(
     access: Awaited<ReturnType<typeof loadOrganisationAccess>>,
   ) => Promise<T>,
 ) {
+  return withOrganisationLock(db, organisationId, async (tx) => {
+    const access = await loadOrganisationAccess(tx, actorId, organisationId);
+    return action(tx, access);
+  });
+}
+
+export async function withOrganisationLock<T>(
+  db: Database,
+  organisationId: string,
+  action: (tx: Transaction) => Promise<T>,
+) {
   return db
     .transaction(
       async (tx) => {
@@ -28,12 +39,7 @@ export async function withLockedOrganisation<T>(
           .where(eq(organisation.id, organisationId))
           .for("update");
         if (!row) throw missing();
-        const access = await loadOrganisationAccess(
-          tx,
-          actorId,
-          organisationId,
-        );
-        return action(tx, access);
+        return action(tx);
       },
       { isolationLevel: "read committed" },
     )

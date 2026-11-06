@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
-import { createTestDatabase } from "../../platform/database/fixtures.js";
+import { createTestDatabase } from "../../../platform/database/fixtures.js";
 
 it("enforces pending-recipient uniqueness, grant roles and durable outbox invariants", async () => {
   const database = await createTestDatabase({ migrate: true });
