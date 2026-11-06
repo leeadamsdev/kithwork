@@ -8,6 +8,7 @@ import { withLockedOrganisation } from "./transaction.js";
 import { missing, forbidden } from "./errors.js";
 import { memberSummary, type MemberRow } from "./presentation.js";
 import { cancelIssuedInvitations } from "./invitations/cancellation.js";
+import { clearIssueAssignments } from "../issues/assignment-cleanup.js";
 const { organisationMember } = organisationsSchema;
 const { user } = authSchema;
 
@@ -84,6 +85,13 @@ export async function changeMemberRole(
           ),
         );
       await cancelIssuedInvitations(tx, organisationId, userId, role);
+      if (target.role !== "member" && role === "member")
+        await clearIssueAssignments(
+          tx,
+          actorId,
+          { organisationId, userId },
+          "organisation_role_changed",
+        );
       return memberSummary({ ...target, role });
     },
   );
@@ -109,6 +117,12 @@ export async function removeMember(
       )
         throw forbidden();
       await preserveOwner(tx, organisationId, target);
+      await clearIssueAssignments(
+        tx,
+        actorId,
+        { organisationId, userId },
+        leaving ? "organisation_member_left" : "organisation_member_removed",
+      );
       await tx
         .delete(organisationMember)
         .where(

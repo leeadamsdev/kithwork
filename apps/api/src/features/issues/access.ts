@@ -9,10 +9,12 @@ import {
   teamReadPredicate,
 } from "../teams/access.js";
 import { issueUnavailable } from "./errors.js";
+import { project } from "../projects/access.js";
 
 export const { issue, issueCounter } = issuesSchema;
 export const { workflowStatus } = workflowsSchema;
 const creator = alias(authSchema.user, "issue_creator");
+const assignee = alias(authSchema.user, "issue_assignee");
 export type IssueScope = { organisationId: string; issueId: string };
 export type IssueRow = typeof issue.$inferSelect;
 export const issueScope = (input: IssueScope) =>
@@ -34,6 +36,13 @@ export function selectIssueAccess(db: Database | Transaction, actorId: string) {
         retiredAt: workflowStatus.retiredAt,
       },
       creator: { id: creator.id, name: creator.name },
+      assignee: { id: assignee.id, name: assignee.name },
+      project: {
+        id: project.id,
+        name: project.name,
+        status: project.status,
+        archivedAt: project.archivedAt,
+      },
     })
     .from(issue)
     .innerJoin(
@@ -66,7 +75,15 @@ export function selectIssueAccess(db: Database | Transaction, actorId: string) {
         eq(workflowStatus.id, issue.statusId),
       ),
     )
-    .leftJoin(creator, eq(creator.id, issue.creatorId));
+    .leftJoin(creator, eq(creator.id, issue.creatorId))
+    .leftJoin(assignee, eq(assignee.id, issue.assigneeId))
+    .leftJoin(
+      project,
+      and(
+        eq(project.organisationId, issue.organisationId),
+        eq(project.id, issue.projectId),
+      ),
+    );
 }
 export type IssueAccess = Awaited<ReturnType<typeof selectIssueAccess>>[number];
 export async function readIssueAccess(

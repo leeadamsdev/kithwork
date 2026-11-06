@@ -3,6 +3,8 @@ import { entityIdSchema } from "../identifiers.js";
 import { calendarDateSchema } from "../primitives/calendar-date.js";
 import { organisationInputSchema } from "../organisations/schema.js";
 import { workflowCategorySchema } from "../workflows/schema.js";
+import { teamInputSchema } from "../teams/inputs.js";
+import { organisationPageInputSchema } from "../organisations/schema.js";
 import { encodedIssueCursorSchema, issuePrioritySchema } from "./schema.js";
 
 const title = z.string().trim().min(1).max(200);
@@ -25,6 +27,8 @@ export const createIssueInputSchema = organisationInputSchema.extend({
   statusId: entityIdSchema.optional(),
   priority: issuePrioritySchema.default("none"),
   dueDate: calendarDateSchema.nullable().default(null),
+  assigneeId: entityIdSchema.nullable().default(null),
+  projectId: entityIdSchema.nullable().default(null),
 });
 export type CreateIssueInput = z.infer<typeof createIssueInputSchema>;
 export const updateIssueInputSchema = versionedIssueInputSchema
@@ -34,6 +38,8 @@ export const updateIssueInputSchema = versionedIssueInputSchema
     statusId: entityIdSchema.optional(),
     priority: issuePrioritySchema.optional(),
     dueDate: calendarDateSchema.nullable().optional(),
+    assigneeId: entityIdSchema.nullable().optional(),
+    projectId: entityIdSchema.nullable().optional(),
   })
   .refine(
     (input) =>
@@ -43,6 +49,8 @@ export const updateIssueInputSchema = versionedIssueInputSchema
         input.statusId,
         input.priority,
         input.dueDate,
+        input.assigneeId,
+        input.projectId,
       ].some((value) => value !== undefined),
     "Provide an issue update",
   );
@@ -64,6 +72,8 @@ export const issueIdentifierInputSchema = organisationInputSchema.extend({
 export const issueListInputSchema = organisationInputSchema.extend({
   teamId: entityIdSchema.optional(),
   statusId: entityIdSchema.optional(),
+  assigneeId: entityIdSchema.optional(),
+  projectId: entityIdSchema.optional(),
   category: workflowCategorySchema.optional(),
   priority: issuePrioritySchema.optional(),
   archived: z.enum(["exclude", "include", "only"]).default("exclude"),
@@ -72,6 +82,12 @@ export const issueListInputSchema = organisationInputSchema.extend({
   limit: z.number().int().min(1).max(100).default(50),
 });
 export type IssueListInput = z.infer<typeof issueListInputSchema>;
+export const issueAssigneePageInputSchema = teamInputSchema.extend(
+  organisationPageInputSchema.shape,
+);
+export type IssueAssigneePageInput = z.infer<
+  typeof issueAssigneePageInputSchema
+>;
 export const issueActivityPageInputSchema = issueInputSchema.extend({
   cursor: z.number().int().positive().max(2147483647).optional(),
   limit: z.number().int().min(1).max(100).default(50),

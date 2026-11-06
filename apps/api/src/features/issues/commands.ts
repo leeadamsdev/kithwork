@@ -6,6 +6,8 @@ import { requireActiveTeam } from "../teams/transaction.js";
 import { issue } from "./access.js";
 import { appendIssueActivity, type IssueActor } from "./activity.js";
 import { allocateIssueNumber } from "./numbering.js";
+import { requireAssignee } from "./assignees.js";
+import { requireProjectLink } from "./project-links.js";
 import { getIssue } from "./queries.js";
 import {
   requireActiveIssue,
@@ -33,6 +35,12 @@ export function createIssue(
       );
       requireActiveTeam(access.team);
       const status = await requireActiveStatus(tx, input, input.statusId);
+      const assignee = input.assigneeId
+        ? await requireAssignee(tx, input, input.assigneeId)
+        : null;
+      const projectId = input.projectId
+        ? await requireProjectLink(tx, actor.id, input, input.projectId)
+        : null;
       const number = await allocateIssueNumber(
         tx,
         input.organisationId,
@@ -50,9 +58,17 @@ export function createIssue(
           priority: input.priority,
           dueDate: input.dueDate,
           creatorId: actor.id,
+          assigneeId: assignee?.id ?? null,
+          projectId,
         })
         .returning();
-      await appendIssueActivity(tx, actor, null, row!, "created", null, status);
+      await appendIssueActivity(
+        tx,
+        actor,
+        null,
+        { issue: row!, status, assignee },
+        "created",
+      );
       return getIssue(tx, actor.id, {
         organisationId: input.organisationId,
         issueId: row!.id,
@@ -71,6 +87,20 @@ export function updateIssue(
     requireActiveIssue(access.issue);
     requireIssueVersion(access.issue, input.expectedVersion);
     const row = access.issue;
+    const assignee =
+      input.assigneeId === undefined
+        ? access.assignee
+        : input.assigneeId === null
+          ? null
+          : await requireAssignee(tx, row, input.assigneeId);
+    const projectId =
+      input.projectId === undefined
+        ? row.projectId
+        : input.projectId === null
+          ? null
+          : input.projectId.toLowerCase() === row.projectId
+            ? row.projectId
+            : await requireProjectLink(tx, actor.id, row, input.projectId);
     const status =
       input.statusId && input.statusId.toLowerCase() !== row.statusId
         ? await requireActiveStatus(tx, row, input.statusId)
@@ -82,23 +112,25 @@ export function updateIssue(
       statusId: status.id,
       priority: input.priority ?? row.priority,
       dueDate: input.dueDate === undefined ? row.dueDate : input.dueDate,
+      assigneeId: assignee?.id ?? null,
+      projectId,
     };
     if (
       values.title !== row.title ||
       values.description !== row.description ||
       values.statusId !== row.statusId ||
       values.priority !== row.priority ||
-      values.dueDate !== row.dueDate
+      values.dueDate !== row.dueDate ||
+      values.assigneeId !== row.assigneeId ||
+      values.projectId !== row.projectId
     ) {
       const updated = await saveIssue(tx, row, values);
       await appendIssueActivity(
         tx,
         actor,
-        row,
-        updated,
+        access,
+        { issue: updated, status, assignee },
         "updated",
-        access.status,
-        status,
       );
     }
     return getIssue(tx, actor.id, input);

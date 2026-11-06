@@ -5,6 +5,7 @@ import { organisationMember, teamMember } from "./access.js";
 import { canManageTeam } from "./policies.js";
 import { teamConflict, teamForbidden, teamUnavailable } from "./errors.js";
 import { requireActiveTeam, withLockedTeam } from "./transaction.js";
+import { clearIssueAssignments } from "../issues/assignment-cleanup.js";
 import {
   findTeamMember,
   presentMember,
@@ -80,6 +81,7 @@ export function removeTeamMember(
     if (!canManageTeam(access.organisationRole, access.membershipRole))
       throw teamForbidden();
     await deleteMembership(tx, input);
+    await clearIssueAssignments(tx, actorId, input, "team_member_removed");
     return { success: true as const };
   });
 }
@@ -104,6 +106,12 @@ export function leaveTeam(
 ) {
   return withLockedTeam(db, actorId, input, async (tx) => {
     await deleteMembership(tx, { ...input, userId: actorId });
+    await clearIssueAssignments(
+      tx,
+      actorId,
+      { ...input, userId: actorId },
+      "team_member_left",
+    );
     return { success: true as const };
   });
 }

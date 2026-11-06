@@ -6,6 +6,7 @@ import { projectForbidden } from "./errors.js";
 import { canManageProject } from "./policies.js";
 import { getProject } from "./queries.js";
 import { requireSelectedTeams } from "./team-access.js";
+import { requireUnlinkedProjectTeams } from "../issues/project-guard.js";
 import {
   requireActiveProject,
   requireProjectVersion,
@@ -47,6 +48,12 @@ export function setProjectTeams(
       const removed = access.currentIds.filter((id) => !desiredIds.has(id));
       const added = input.teamIds.filter(
         (id) => !access.currentIds.includes(id),
+      );
+      await requireUnlinkedProjectTeams(
+        tx,
+        input.organisationId,
+        input.projectId,
+        removed,
       );
       if (removed.length)
         await tx

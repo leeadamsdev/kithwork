@@ -12,6 +12,8 @@ import {
 } from "./access.js";
 import { issueUnavailable } from "./errors.js";
 import { presentIssue, presentIssueSummary } from "./presentation.js";
+import { requireAssigneeFilter } from "./assignees.js";
+import { readVisibleIssueProjects } from "./project-links.js";
 
 export async function getIssue(
   db: Database | Transaction,
@@ -46,6 +48,17 @@ export async function listIssues(
     await readTeamAccess(db, actorId, input.organisationId, input.teamId);
   if (input.statusId)
     await readStatusAccess(db, actorId, input.organisationId, input.statusId);
+  if (input.assigneeId)
+    await requireAssigneeFilter(db, input.organisationId, input.assigneeId);
+  if (
+    input.projectId &&
+    !(
+      await readVisibleIssueProjects(db, actorId, input.organisationId, [
+        input.projectId,
+      ])
+    ).length
+  )
+    throw issueUnavailable();
   const rows = await selectIssueAccess(db, actorId)
     .where(
       and(
@@ -53,6 +66,8 @@ export async function listIssues(
         teamReadPredicate(),
         input.teamId ? eq(issue.teamId, input.teamId) : undefined,
         input.statusId ? eq(issue.statusId, input.statusId) : undefined,
+        input.assigneeId ? eq(issue.assigneeId, input.assigneeId) : undefined,
+        input.projectId ? eq(issue.projectId, input.projectId) : undefined,
         input.category
           ? eq(workflowStatus.category, input.category)
           : undefined,

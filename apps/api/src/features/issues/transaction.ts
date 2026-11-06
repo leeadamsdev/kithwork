@@ -95,6 +95,8 @@ export async function saveIssue(
       | "priority"
       | "dueDate"
       | "archivedAt"
+      | "assigneeId"
+      | "projectId"
     >
   >,
 ) {
