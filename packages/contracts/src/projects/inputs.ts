@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { entityIdSchema } from "../identifiers.js";
+import { textInputSchema } from "../primitives/text-input.js";
 import {
   organisationInputSchema,
   organisationPageInputSchema,
 } from "../organisations/schema.js";
 import { projectDateSchema, projectStatusSchema } from "./schema.js";
 
-const name = z.string().trim().min(1).max(100);
-const description = z
-  .string()
+const name = textInputSchema.trim().min(1).max(100);
+const description = textInputSchema
   .trim()
   .max(2000)
   .transform((value) => value || null)

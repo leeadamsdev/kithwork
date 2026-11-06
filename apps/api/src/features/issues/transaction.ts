@@ -53,7 +53,7 @@ export function requireIssueVersion(row: IssueRow, expected: number) {
   if (row.version !== expected)
     throw issueConflict("Issue has changed; refresh and retry");
 }
-export function requireActiveIssue(row: IssueRow) {
+export function requireActiveIssue(row: Pick<IssueRow, "archivedAt">) {
   if (row.archivedAt)
     throw issueConflict("Restore this issue before changing it");
 }

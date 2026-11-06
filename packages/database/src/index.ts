@@ -9,3 +9,5 @@ export * as projectsSchema from "./schema/projects.js";
 export * as workflowsSchema from "./schema/workflows.js";
 export * as issuesSchema from "./schema/issues.js";
 export * as issueActivitySchema from "./schema/issue-activity.js";
+export * as commentsSchema from "./schema/comments.js";
+export * as commentEventsSchema from "./schema/comment-events.js";

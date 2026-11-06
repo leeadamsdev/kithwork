@@ -44,6 +44,12 @@ const schema = z
     API_TEAM_CREATION_RATE_LIMIT_MAX: integer(1, 1000).default(10),
     API_PROJECT_CREATION_RATE_LIMIT_MAX: integer(1, 1000).default(20),
     API_ISSUE_CREATION_ACTOR_RATE_LIMIT_MAX: integer(1, 100000).default(60),
+    API_COMMENT_CREATION_ACTOR_RATE_LIMIT_MAX: integer(1, 100000).default(60),
+    API_COMMENT_CREATION_ORGANISATION_RATE_LIMIT_MAX: integer(
+      1,
+      100000,
+    ).default(600),
+    API_COMMENT_EDIT_RATE_LIMIT_MAX: integer(1, 100000).default(120),
     API_ISSUE_CREATION_ORGANISATION_RATE_LIMIT_MAX: integer(1, 100000).default(
       300,
     ),
@@ -113,6 +119,11 @@ export function parseConfig(env: Record<string, string | undefined>) {
     projectCreationRateLimitMax: value.API_PROJECT_CREATION_RATE_LIMIT_MAX,
     issueCreationActorRateLimitMax:
       value.API_ISSUE_CREATION_ACTOR_RATE_LIMIT_MAX,
+    commentCreationActorRateLimitMax:
+      value.API_COMMENT_CREATION_ACTOR_RATE_LIMIT_MAX,
+    commentCreationOrganisationRateLimitMax:
+      value.API_COMMENT_CREATION_ORGANISATION_RATE_LIMIT_MAX,
+    commentEditRateLimitMax: value.API_COMMENT_EDIT_RATE_LIMIT_MAX,
     issueCreationOrganisationRateLimitMax:
       value.API_ISSUE_CREATION_ORGANISATION_RATE_LIMIT_MAX,
     auth: {

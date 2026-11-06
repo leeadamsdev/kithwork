@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { entityIdSchema } from "../identifiers.js";
+import { textInputSchema } from "../primitives/text-input.js";
 
 export const organisationRoles = ["owner", "admin", "member"] as const;
 export const organisationRoleSchema = z.enum(organisationRoles);
 export type OrganisationRole = z.infer<typeof organisationRoleSchema>;
 
-const name = z.string().trim().min(1).max(100);
+const name = textInputSchema.trim().min(1).max(100);
 export const createOrganisationInputSchema = z.strictObject({ name });
 export const organisationInputSchema = z.strictObject({
   organisationId: entityIdSchema,

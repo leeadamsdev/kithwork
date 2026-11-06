@@ -3,6 +3,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import type { createAuth } from "./provider.js";
 import type { ApiConfig } from "../../config.js";
 import { z } from "zod";
+import { textInputSchema } from "@kithwork/contracts";
 
 // Leave room for the origin and signed token in the mail queue's 4096-character URL.
 const redirect = z.string().refine((value) => {
@@ -13,6 +14,8 @@ const redirect = z.string().refine((value) => {
   }
 });
 const authBody = z.looseObject({
+  name: textInputSchema.optional(),
+  image: textInputSchema.nullable().optional(),
   email: z.email().max(254).optional(),
   callbackURL: redirect.optional(),
   redirectTo: redirect.optional(),

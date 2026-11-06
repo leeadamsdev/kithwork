@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { entityIdSchema } from "../identifiers.js";
+import { textInputSchema } from "../primitives/text-input.js";
 import { organisationPageInputSchema } from "../organisations/schema.js";
 import { teamInputSchema } from "../teams/inputs.js";
 import { maxActiveWorkflowStatuses, workflowCategorySchema } from "./schema.js";
@@ -8,9 +9,8 @@ export const workflowInputSchema = teamInputSchema;
 export const versionedWorkflowInputSchema = workflowInputSchema.extend({
   expectedWorkflowVersion: z.number().int().positive().max(2147483647),
 });
-const name = z.string().trim().min(1).max(50);
-const description = z
-  .string()
+const name = textInputSchema.trim().min(1).max(50);
+const description = textInputSchema
   .trim()
   .max(500)
   .transform((value) => value || null)

@@ -58,6 +58,27 @@ export async function createApiContext(
         config.organisationCreationRateLimitMax,
         "Organisation creation rate limit exceeded",
       ),
+    consumeCommentCreationLimit: async (
+      actorId: string,
+      organisationId: string,
+    ) => {
+      await consume(
+        `comment:create:actor:${actorId.toLowerCase()}`,
+        config.commentCreationActorRateLimitMax,
+        "Comment creation rate limit exceeded",
+      );
+      await consume(
+        `comment:create:organisation:${organisationId.toLowerCase()}`,
+        config.commentCreationOrganisationRateLimitMax,
+        "Comment creation rate limit exceeded",
+      );
+    },
+    consumeCommentEditLimit: (actorId: string) =>
+      consume(
+        `comment:edit:actor:${actorId.toLowerCase()}`,
+        config.commentEditRateLimitMax,
+        "Comment editing rate limit exceeded",
+      ),
     consumeInvitationSendLimit: async (
       actorId: string,
       organisationId: string,
