@@ -56,6 +56,7 @@ describe("API configuration", () => {
       organisationCreationRateLimitMax: 5,
       invitationSendRateLimitMax: 10,
       invitationAccessRateLimitMax: 30,
+      teamCreationRateLimitMax: 10,
     });
   });
   it("accepts ephemeral ports and explicit telemetry configuration", () => {
@@ -80,6 +81,8 @@ describe("API configuration", () => {
     { ...required, API_PORT: "65536" },
     { ...required, API_PORT: "1.5" },
     { ...required, API_RATE_LIMIT_MAX: "0" },
+    { ...required, API_TEAM_CREATION_RATE_LIMIT_MAX: "0" },
+    { ...required, API_TEAM_CREATION_RATE_LIMIT_MAX: "1001" },
     { ...required, OTEL_SDK_DISABLED: "no" },
     { ...required, OTEL_SDK_DISABLED: "false" },
     {

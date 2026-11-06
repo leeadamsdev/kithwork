@@ -51,7 +51,7 @@ export function registerApiResources(app: FastifyInstance, config: ApiConfig) {
   });
   app.addHook("onReady", async () => {
     const probe = {
-      text: "SELECT 1 FROM auth_user, organisation, organisation_member, organisation_invitation, email_outbox LIMIT 0",
+      text: "SELECT 1 FROM auth_user, organisation, organisation_member, organisation_invitation, email_outbox, team, team_member LIMIT 0",
       query_timeout: 1000,
     };
     await Promise.all([pool.query(probe), redis.ping()]);

@@ -1,5 +1,9 @@
-import { invitationsSchema, outboxSchema } from "@kithwork/database";
-import { and, eq, gt } from "drizzle-orm";
+import {
+  invitationsSchema,
+  organisationsSchema,
+  outboxSchema,
+} from "@kithwork/database";
+import { and, eq, exists, gt, inArray } from "drizzle-orm";
 import type {
   Database,
   Transaction,
@@ -9,6 +13,7 @@ import { currentTimeMs, resendCooldownMs } from "./timing.js";
 
 const { organisationInvitation: invitation } = invitationsSchema;
 const { emailOutbox: outbox } = outboxSchema;
+const { organisationMember } = organisationsSchema;
 
 export async function loadInvitation(
   tx: Transaction,
@@ -92,6 +97,7 @@ export async function invitationSummary(
 
 export async function listInvitations(
   db: Database,
+  actorId: string,
   organisationId: string,
   input: { cursor?: string | undefined; limit: number },
 ) {
@@ -99,6 +105,18 @@ export async function listInvitations(
     .where(
       and(
         eq(invitation.organisationId, organisationId),
+        exists(
+          db
+            .select({ userId: organisationMember.userId })
+            .from(organisationMember)
+            .where(
+              and(
+                eq(organisationMember.organisationId, organisationId),
+                eq(organisationMember.userId, actorId),
+                inArray(organisationMember.role, ["owner", "admin"]),
+              ),
+            ),
+        ),
         input.cursor ? gt(invitation.id, input.cursor) : undefined,
       ),
     )

@@ -6,3 +6,5 @@ export {
 } from "./auth/schema.js";
 export * from "./organisations/schema.js";
 export * from "./organisations/invitations.js";
+export * from "./teams/schema.js";
+export * from "./teams/inputs.js";

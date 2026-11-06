@@ -14,4 +14,8 @@ export interface ApiContext {
     organisationId: string,
   ) => Promise<void>;
   consumeInvitationAccessLimit: (actorId: string) => Promise<void>;
+  consumeTeamCreationLimit: (
+    actorId: string,
+    organisationId: string,
+  ) => Promise<void>;
 }

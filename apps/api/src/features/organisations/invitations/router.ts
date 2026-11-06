@@ -73,7 +73,7 @@ export const invitationsRouter = router({
     .input(invitationPageInputSchema)
     .output(invitationPageSchema)
     .query(({ ctx, input }) =>
-      listInvitations(ctx.db, input.organisationId, input),
+      listInvitations(ctx.db, ctx.user.id, input.organisationId, input),
     ),
   resend: administration
     .input(invitationInputSchema)

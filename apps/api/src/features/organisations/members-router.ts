@@ -15,7 +15,9 @@ export const membersRouter = router({
   list: organisationProcedure
     .input(memberPageInputSchema)
     .output(memberPageSchema)
-    .query(({ ctx, input }) => listMembers(ctx.db, ctx.organisation.id, input)),
+    .query(({ ctx, input }) =>
+      listMembers(ctx.db, ctx.user.id, ctx.organisation.id, input),
+    ),
   changeRole: organisationProcedure
     .input(changeMemberRoleInputSchema)
     .output(organisationMemberSchema)
