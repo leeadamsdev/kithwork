@@ -113,8 +113,11 @@ it("recovers after enqueue-before-ack and sends real SMTP once despite job remov
     onEvent: () => {},
   });
   try {
+    // Rendering and real SMTP delivery can exceed the default polling deadline.
     await expect
-      .poll(async () => (await queue.getJob(event.id))?.getState())
+      .poll(async () => (await queue.getJob(event.id))?.getState(), {
+        timeout: 5000,
+      })
       .toBe("completed");
     const messages = async () =>
       (await (
