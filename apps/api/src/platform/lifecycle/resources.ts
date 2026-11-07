@@ -51,7 +51,7 @@ export function registerApiResources(app: FastifyInstance, config: ApiConfig) {
   });
   app.addHook("onReady", async () => {
     const probe = {
-      text: "SELECT 1 FROM auth_user, organisation, organisation_member, organisation_invitation, email_outbox, team, team_member, project, project_team, team_workflow, workflow_status, issue, issue_counter, issue_activity, issue_comment, issue_comment_event LIMIT 0",
+      text: "SELECT issue_comment.mentions_initialised FROM auth_user, organisation, organisation_member, organisation_invitation, email_outbox, team, team_member, project, project_team, team_workflow, workflow_status, issue, issue_counter, issue_activity, issue_comment, issue_comment_event, issue_comment_mention, issue_subscription LIMIT 0",
       query_timeout: 1000,
     };
     await Promise.all([pool.query(probe), redis.ping()]);

@@ -21,18 +21,18 @@ import { createIssue, updateIssue } from "./commands.js";
 import { getIssue, getIssueByIdentifier, listIssues } from "./queries.js";
 import { listIssueActivity } from "./activity-queries.js";
 import { setIssueArchived } from "./lifecycle.js";
-import { listIssueAssignees } from "./assignees.js";
+import { listIssueAudience } from "./audience.js";
 import { commentsRouter } from "./comments/router.js";
+import { subscriptionsRouter } from "./subscriptions/router.js";
 
 export const issuesRouter = router({
   comments: commentsRouter,
+  subscriptions: subscriptionsRouter,
   assignees: router({
     list: organisationProcedure
       .input(issueAssigneePageInputSchema)
       .output(issueAssigneePageSchema)
-      .query(({ ctx, input }) =>
-        listIssueAssignees(ctx.db, ctx.user.id, input),
-      ),
+      .query(({ ctx, input }) => listIssueAudience(ctx.db, ctx.user.id, input)),
   }),
   create: organisationProcedure
     .input(createIssueInputSchema)

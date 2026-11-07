@@ -3,6 +3,8 @@ import { entityIdSchema } from "../../identifiers.js";
 import { textInputSchema } from "../../primitives/text-input.js";
 import { issueInputSchema } from "../inputs.js";
 import { encodedIssueCursorSchema } from "../schema.js";
+import { teamInputSchema } from "../../teams/inputs.js";
+import { organisationPageInputSchema } from "../../organisations/schema.js";
 
 const body = textInputSchema
   .min(1)
@@ -34,3 +36,10 @@ export const issueCommentListInputSchema = issueInputSchema.extend({
   limit: z.number().int().min(1).max(100).default(50),
 });
 export type IssueCommentListInput = z.infer<typeof issueCommentListInputSchema>;
+export const issueMentionTargetsInputSchema = teamInputSchema.extend({
+  ...organisationPageInputSchema.shape,
+  prefix: textInputSchema.trim().max(100).optional(),
+});
+export type IssueMentionTargetsInput = z.infer<
+  typeof issueMentionTargetsInputSchema
+>;

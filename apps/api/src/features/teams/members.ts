@@ -6,6 +6,7 @@ import { canManageTeam } from "./policies.js";
 import { teamConflict, teamForbidden, teamUnavailable } from "./errors.js";
 import { requireActiveTeam, withLockedTeam } from "./transaction.js";
 import { clearIssueAssignments } from "../issues/assignment-cleanup.js";
+import { clearInaccessibleIssueSubscriptions } from "../issues/subscriptions/maintenance.js";
 import {
   findTeamMember,
   presentMember,
@@ -82,6 +83,7 @@ export function removeTeamMember(
       throw teamForbidden();
     await deleteMembership(tx, input);
     await clearIssueAssignments(tx, actorId, input, "team_member_removed");
+    await clearInaccessibleIssueSubscriptions(tx, input);
     return { success: true as const };
   });
 }
@@ -112,6 +114,10 @@ export function leaveTeam(
       { ...input, userId: actorId },
       "team_member_left",
     );
+    await clearInaccessibleIssueSubscriptions(tx, {
+      ...input,
+      userId: actorId,
+    });
     return { success: true as const };
   });
 }

@@ -9,6 +9,7 @@ import { allocateIssueNumber } from "./numbering.js";
 import { requireAssignee } from "./assignees.js";
 import { requireProjectLink } from "./project-links.js";
 import { getIssue } from "./queries.js";
+import { autoFollowIssue } from "./subscriptions/commands.js";
 import {
   requireActiveIssue,
   requireActiveStatus,
@@ -68,6 +69,11 @@ export function createIssue(
         null,
         { issue: row!, status, assignee },
         "created",
+      );
+      await autoFollowIssue(
+        tx,
+        { organisationId: input.organisationId, issueId: row!.id },
+        [actor.id, ...(assignee ? [assignee.id] : [])],
       );
       return getIssue(tx, actor.id, {
         organisationId: input.organisationId,
@@ -132,6 +138,8 @@ export function updateIssue(
         { issue: updated, status, assignee },
         "updated",
       );
+      if (values.assigneeId && values.assigneeId !== row.assigneeId)
+        await autoFollowIssue(tx, input, [values.assigneeId]);
     }
     return getIssue(tx, actor.id, input);
   });

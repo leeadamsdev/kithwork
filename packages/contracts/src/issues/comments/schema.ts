@@ -3,12 +3,21 @@ import { entityIdSchema } from "../../identifiers.js";
 
 export const issueCommentEventKinds = ["created", "edited", "deleted"] as const;
 export type IssueCommentEventKind = (typeof issueCommentEventKinds)[number];
+export const issueMentionTargetSchema = z.strictObject({
+  id: entityIdSchema,
+  name: z.string(),
+});
+export const issueMentionTargetPageSchema = z.strictObject({
+  items: z.array(issueMentionTargetSchema),
+  nextCursor: entityIdSchema.nullable(),
+});
 export const issueCommentSchema = z.strictObject({
   id: entityIdSchema,
   organisationId: entityIdSchema,
   issueId: entityIdSchema,
   author: z.strictObject({ id: entityIdSchema.nullable(), name: z.string() }),
   body: z.string().nullable(),
+  mentions: z.array(issueMentionTargetSchema).max(20),
   version: z.number().int().positive().max(2147483647),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

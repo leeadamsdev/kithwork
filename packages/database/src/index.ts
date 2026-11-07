@@ -11,3 +11,5 @@ export * as issuesSchema from "./schema/issues.js";
 export * as issueActivitySchema from "./schema/issue-activity.js";
 export * as commentsSchema from "./schema/comments.js";
 export * as commentEventsSchema from "./schema/comment-events.js";
+export * as commentMentionsSchema from "./schema/comment-mentions.js";
+export * as issueSubscriptionsSchema from "./schema/issue-subscriptions.js";

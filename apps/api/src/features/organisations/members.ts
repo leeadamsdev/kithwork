@@ -9,6 +9,7 @@ import { missing, forbidden } from "./errors.js";
 import { memberSummary, type MemberRow } from "./presentation.js";
 import { cancelIssuedInvitations } from "./invitations/cancellation.js";
 import { clearIssueAssignments } from "../issues/assignment-cleanup.js";
+import { clearInaccessibleIssueSubscriptions } from "../issues/subscriptions/maintenance.js";
 const { organisationMember } = organisationsSchema;
 const { user } = authSchema;
 
@@ -85,13 +86,18 @@ export async function changeMemberRole(
           ),
         );
       await cancelIssuedInvitations(tx, organisationId, userId, role);
-      if (target.role !== "member" && role === "member")
+      if (target.role !== "member" && role === "member") {
         await clearIssueAssignments(
           tx,
           actorId,
           { organisationId, userId },
           "organisation_role_changed",
         );
+        await clearInaccessibleIssueSubscriptions(tx, {
+          organisationId,
+          userId,
+        });
+      }
       return memberSummary({ ...target, role });
     },
   );

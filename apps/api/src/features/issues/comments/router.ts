@@ -6,6 +6,8 @@ import {
   issueCommentListInputSchema,
   issueCommentSchema,
   issueCommentPageSchema,
+  issueMentionTargetsInputSchema,
+  issueMentionTargetPageSchema,
 } from "@kithwork/contracts";
 import { router } from "../../../platform/trpc/procedures.js";
 import { organisationProcedure } from "../../organisations/procedure.js";
@@ -17,8 +19,13 @@ import { createComment, updateComment, deleteComment } from "./commands.js";
 import { getComment, listComments } from "./queries.js";
 import { readCommentAccess } from "./access.js";
 import { canEditComment } from "./policies.js";
+import { listIssueAudience } from "../audience.js";
 
 export const commentsRouter = router({
+  mentionTargets: organisationProcedure
+    .input(issueMentionTargetsInputSchema)
+    .output(issueMentionTargetPageSchema)
+    .query(({ ctx, input }) => listIssueAudience(ctx.db, ctx.user.id, input)),
   create: organisationProcedure
     .input(createIssueCommentInputSchema)
     .output(issueCommentSchema)

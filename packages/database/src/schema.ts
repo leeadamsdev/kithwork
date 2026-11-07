@@ -9,3 +9,5 @@ export * from "./schema/issues.js";
 export * from "./schema/issue-activity.js";
 export * from "./schema/comments.js";
 export * from "./schema/comment-events.js";
+export * from "./schema/comment-mentions.js";
+export * from "./schema/issue-subscriptions.js";
