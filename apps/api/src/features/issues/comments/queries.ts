@@ -3,7 +3,10 @@ import {
   type IssueCommentListInput,
 } from "@kithwork/contracts";
 import { and, eq, gt, or } from "drizzle-orm";
-import type { Database } from "../../../platform/database/types.js";
+import type {
+  Database,
+  Transaction,
+} from "../../../platform/database/types.js";
 import { teamReadPredicate } from "../../teams/access.js";
 import { readIssueAccess } from "../access.js";
 import {
@@ -13,14 +16,23 @@ import {
   type CommentScope,
 } from "./access.js";
 import { presentComment } from "./presentation.js";
+import { readCommentMentions } from "./mention-queries.js";
 
 export async function getComment(
-  db: Database,
+  db: Database | Transaction,
   actorId: string,
   input: CommentScope,
 ) {
   const row = await readCommentAccess(db, actorId, input);
-  return presentComment(row.comment, row, actorId);
+  const mentions = await readCommentMentions(db, actorId, input, [
+    row.comment.id,
+  ]);
+  return presentComment(
+    row.comment,
+    row,
+    actorId,
+    mentions.get(row.comment.id) ?? [],
+  );
 }
 export async function listComments(
   db: Database,
@@ -47,9 +59,21 @@ export async function listComments(
     )
     .orderBy(issueComment.createdAt, issueComment.id)
     .limit(input.limit + 1);
-  const items = rows
-    .slice(0, input.limit)
-    .map((row) => presentComment(row.comment, row, actorId));
+  const page = rows.slice(0, input.limit);
+  const mentions = await readCommentMentions(
+    db,
+    actorId,
+    input,
+    page.map((row) => row.comment.id),
+  );
+  const items = page.map((row) =>
+    presentComment(
+      row.comment,
+      row,
+      actorId,
+      mentions.get(row.comment.id) ?? [],
+    ),
+  );
   const last = items.at(-1);
   return {
     items,

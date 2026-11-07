@@ -20,7 +20,9 @@ import {
 } from "./access.js";
 import { appendCommentEvent, type CommentActor } from "./events.js";
 import { canEditComment, canDeleteComment } from "./policies.js";
-import { presentComment } from "./presentation.js";
+import { getComment } from "./queries.js";
+import { syncCommentMentions, clearCommentMentions } from "./mentions.js";
+import { autoFollowIssue } from "../subscriptions/commands.js";
 
 export function createComment(
   db: Database,
@@ -45,7 +47,7 @@ export function createComment(
     if (existing) {
       if (existing.creationHash !== hash)
         throw issueConflict("Creation key already used for another comment");
-      return presentComment(existing, access, actor.id);
+      return getComment(tx, actor.id, { ...input, commentId: existing.id });
     }
     const [row] = await tx
       .insert(issueComment)
@@ -60,7 +62,9 @@ export function createComment(
       })
       .returning();
     await appendCommentEvent(tx, actor, row!, "created");
-    return presentComment(row!, access, actor.id);
+    await syncCommentMentions(tx, access.issue.teamId, null, row!);
+    await autoFollowIssue(tx, input, [actor.id]);
+    return getComment(tx, actor.id, { ...input, commentId: row!.id });
   });
 }
 function requireVersion(row: CommentRow, expected: number) {
@@ -105,13 +109,18 @@ export function updateComment(
     requireActiveIssue(access.issue);
     if (row.deletedAt) throw issueConflict("Comment has been deleted");
     requireVersion(row, input.expectedVersion);
-    if (row.body === input.body) return presentComment(row, access, actor.id);
+    if (row.body === input.body) {
+      if (!row.mentionsInitialised)
+        await syncCommentMentions(tx, access.issue.teamId, row, row);
+      return getComment(tx, actor.id, input);
+    }
     const updated = await saveComment(tx, row, {
       body: input.body,
       editedAt: new Date(),
     });
     await appendCommentEvent(tx, actor, updated, "edited");
-    return presentComment(updated, access, actor.id);
+    await syncCommentMentions(tx, access.issue.teamId, row, updated);
+    return getComment(tx, actor.id, input);
   });
 }
 export function deleteComment(
@@ -123,13 +132,14 @@ export function deleteComment(
     const row = await lockComment(tx, input);
     if (!canDeleteComment(row, access, actor.id)) throw issueForbidden();
     // Deletion remains available on archived targets, but only with current access and authority.
-    if (row.deletedAt) return presentComment(row, access, actor.id);
+    if (row.deletedAt) return getComment(tx, actor.id, input);
     requireVersion(row, input.expectedVersion);
     const updated = await saveComment(tx, row, {
       body: null,
       deletedAt: new Date(),
     });
     await appendCommentEvent(tx, actor, updated, "deleted");
-    return presentComment(updated, access, actor.id);
+    await clearCommentMentions(tx, updated);
+    return getComment(tx, actor.id, input);
   });
 }

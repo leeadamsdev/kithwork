@@ -3,7 +3,7 @@ import { authSchema } from "@kithwork/database";
 import { and, eq, isNotNull, not, sql } from "drizzle-orm";
 import type { Transaction } from "../../platform/database/types.js";
 import { issue } from "./access.js";
-import { eligibleAssigneePredicate } from "./assignees.js";
+import { eligibleIssueParticipantPredicate } from "./audience.js";
 import { issueConflict } from "./errors.js";
 
 type CleanupScope = {
@@ -30,7 +30,7 @@ export async function clearIssueAssignments(
     departing
       ? undefined
       : not(
-          eligibleAssigneePredicate(
+          eligibleIssueParticipantPredicate(
             issue.organisationId,
             issue.teamId,
             issue.assigneeId,

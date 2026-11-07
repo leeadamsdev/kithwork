@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   check,
+  boolean,
   foreignKey,
   index,
   integer,
@@ -24,6 +25,9 @@ export const issueComment = pgTable(
     }),
     authorName: text("author_name").notNull(),
     body: text("body"),
+    mentionsInitialised: boolean("mentions_initialised")
+      .default(false)
+      .notNull(),
     version: integer("version").default(1).notNull(),
     creationKey: uuid("creation_key").notNull(),
     creationHash: text("creation_hash").notNull(),

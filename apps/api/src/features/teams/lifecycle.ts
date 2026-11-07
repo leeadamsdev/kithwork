@@ -5,6 +5,7 @@ import { teamForbidden } from "./errors.js";
 import { presentTeam } from "./presentation.js";
 import { requireSafeTeamArchive } from "./archive-guard.js";
 import { clearIssueAssignments } from "../issues/assignment-cleanup.js";
+import { clearInaccessibleIssueSubscriptions } from "../issues/subscriptions/maintenance.js";
 import {
   requireActiveTeam,
   requireTeamVersion,
@@ -34,13 +35,15 @@ export function setTeamVisibility(
     if (
       access.team.visibility !== input.visibility &&
       input.visibility === "private"
-    )
+    ) {
       await clearIssueAssignments(
         tx,
         actorId,
         input,
         "team_visibility_changed",
       );
+      await clearInaccessibleIssueSubscriptions(tx, input);
+    }
     return presentTeam(row, access.organisationRole, access.membershipRole);
   });
 }

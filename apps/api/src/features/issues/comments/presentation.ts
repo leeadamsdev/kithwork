@@ -9,6 +9,7 @@ export function presentComment(
   comment: CommentRow,
   access: CommentContext,
   actorId: string,
+  mentions: { id: string; name: string }[],
 ) {
   return {
     id: comment.id,
@@ -16,6 +17,7 @@ export function presentComment(
     issueId: comment.issueId,
     author: { id: comment.authorId, name: comment.authorName },
     body: comment.body,
+    mentions,
     version: comment.version,
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),

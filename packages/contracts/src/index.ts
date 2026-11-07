@@ -19,3 +19,5 @@ export * from "./issues/inputs.js";
 export * from "./issues/activity.js";
 export * from "./issues/comments/schema.js";
 export * from "./issues/comments/inputs.js";
+export * from "./issues/comments/mentions.js";
+export * from "./issues/subscriptions.js";
